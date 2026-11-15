@@ -28,9 +28,11 @@ class HeizungKachel extends IPSModuleStrict
         $this->RegisterPropertyInteger('TargetID', 0);     // aktueller Sollwert (wird vom Wochenplan gesetzt)
         $this->RegisterPropertyInteger('ScheduleID', 0);   // Wochenplan
         $this->RegisterPropertyInteger('ValveID', 0);      // optional: Ventilposition / Stellwert in %
-        $this->RegisterPropertyFloat('StepSize', 0.5);
-        $this->RegisterPropertyFloat('MinTemp', 10.0);     // Fallback, wenn die Variable keine Grenzen hat
-        $this->RegisterPropertyFloat('MaxTemp', 28.0);
+        $this->RegisterPropertyInteger('HumidityID', 0);   // optional: relative Luftfeuchte eines Raumsensors
+        $this->RegisterPropertyInteger('HumidityTempID', 0); // optional: Temperatur desselben Sensors (für die Umrechnung)
+        $this->RegisterPropertyFloat('StepSize', 1.0);
+        $this->RegisterPropertyFloat('MinTemp', 10.0);     // Bereich für Sollwert und Schieberegler
+        $this->RegisterPropertyFloat('MaxTemp', 24.0);
         $this->RegisterPropertyBoolean('ApplyToCurrent', true);
         $this->RegisterPropertyInteger('AccentColor', 0xE8590C);
 
@@ -51,7 +53,10 @@ class HeizungKachel extends IPSModuleStrict
         }
 
         $watch = [];
-        $vars = [$this->ReadPropertyInteger('ActualID'), $this->ReadPropertyInteger('TargetID'), $this->ReadPropertyInteger('ValveID')];
+        $vars = [
+            $this->ReadPropertyInteger('ActualID'), $this->ReadPropertyInteger('TargetID'), $this->ReadPropertyInteger('ValveID'),
+            $this->ReadPropertyInteger('HumidityID'), $this->ReadPropertyInteger('HumidityTempID')
+        ];
         $eid = $this->ReadPropertyInteger('ScheduleID');
         $ok = $eid > 0 && @IPS_EventExists($eid) && IPS_GetEvent($eid)['EventType'] === 2;
         if ($ok) {
@@ -214,12 +219,13 @@ class HeizungKachel extends IPSModuleStrict
     private function BuildState(): array
     {
         $step = max(0.1, $this->ReadPropertyFloat('StepSize'));
-        $state = ['step' => $step, 'actual' => null, 'target' => null, 'valve' => null, 'modes' => [], 'groups' => [], 'active' => false, 'current' => 0, 'error' => ''];
+        $state = ['step' => $step, 'actual' => null, 'humidity' => null, 'target' => null, 'valve' => null, 'modes' => [], 'groups' => [], 'active' => false, 'current' => 0, 'error' => ''];
 
         $aid = $this->ReadPropertyInteger('ActualID');
         if ($aid > 0 && @IPS_VariableExists($aid)) {
             $state['actual'] = (float) GetValue($aid);
         }
+        $state['humidity'] = $this->Humidity($state['actual']);
         $tid = $this->ReadPropertyInteger('TargetID');
         if ($tid > 0 && @IPS_VariableExists($tid)) {
             $r = $this->Range($tid);
@@ -326,30 +332,46 @@ class HeizungKachel extends IPSModuleStrict
         return (int) ($sched['LastActionID'] ?? 0);
     }
 
-    /** [min, max] aus Darstellung bzw. Profil der Variable, sonst aus den Eigenschaften */
+    /** [min, max] für Sollwert und Schieberegler (Eigenschaften der Instanz, für alle Variablen gleich) */
     private function Range(int $vid): array
     {
-        $min = null;
-        $max = null;
-        if (function_exists('IPS_GetVariablePresentation')) {
-            $p = @IPS_GetVariablePresentation($vid);
-            if (is_array($p) && isset($p['MIN'], $p['MAX']) && (float) $p['MAX'] > (float) $p['MIN']) {
-                $min = (float) $p['MIN'];
-                $max = (float) $p['MAX'];
+        $min = $this->ReadPropertyFloat('MinTemp');
+        $max = $this->ReadPropertyFloat('MaxTemp');
+        return $max > $min ? [$min, $max] : [$max, $min];
+    }
+
+    /** Sättigungsdampfdruck über Wasser in hPa (Magnus-Formel) */
+    private static function SaturationPressure(float $t): float
+    {
+        return 6.112 * exp(17.62 * $t / (243.12 + $t));
+    }
+
+    /**
+     * Luftfeuchte des Raumsensors. Weicht dessen Temperatur von der Ist-Temperatur ab, wird über die absolute Feuchte
+     * (g/m³ beim Sensor) die relative Feuchte bei der Ist-Temperatur berechnet.
+     */
+    private function Humidity(?float $actual): ?array
+    {
+        $hid = $this->ReadPropertyInteger('HumidityID');
+        if ($hid <= 0 || !@IPS_VariableExists($hid)) {
+            return null;
+        }
+        $rh = (float) GetValue($hid);
+        if ($rh <= 0 || $rh > 100) {
+            return null;
+        }
+        $r = ['rh' => $rh, 'raw' => $rh, 'ts' => null, 'ah' => null];
+        $tid = $this->ReadPropertyInteger('HumidityTempID');
+        if ($tid > 0 && @IPS_VariableExists($tid)) {
+            $ts = (float) GetValue($tid);
+            $ah = 216.7 * ($rh / 100 * self::SaturationPressure($ts)) / (273.15 + $ts);
+            $r['ts'] = $ts;
+            $r['ah'] = round($ah, 1);
+            if ($actual !== null && abs($actual - $ts) >= 0.05) {
+                $r['rh'] = round(min(100, $ah * (273.15 + $actual) / (216.7 * self::SaturationPressure($actual)) * 100), 1);
             }
         }
-        if ($min === null) {
-            $v = IPS_GetVariable($vid);
-            $prof = $v['VariableCustomProfile'] !== '' ? $v['VariableCustomProfile'] : $v['VariableProfile'];
-            if ($prof !== '' && IPS_VariableProfileExists($prof)) {
-                $pp = IPS_GetVariableProfile($prof);
-                if ($pp['MaxValue'] > $pp['MinValue']) {
-                    $min = (float) $pp['MinValue'];
-                    $max = (float) $pp['MaxValue'];
-                }
-            }
-        }
-        return [$min ?? $this->ReadPropertyFloat('MinTemp'), $max ?? $this->ReadPropertyFloat('MaxTemp')];
+        return $r;
     }
 
     private function Clamp(float $v, array $r): float

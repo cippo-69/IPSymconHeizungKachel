@@ -2,66 +2,107 @@
 :root {
   --hz-accent: #E8590C;
   --hz-bg: rgba(127,127,127,.07);
-  --hz-bg2: rgba(127,127,127,.14);
-  --hz-line: rgba(127,127,127,.22);
+  --hz-bg2: rgba(127,127,127,.13);
+  --hz-line: rgba(127,127,127,.2);
   --hz-muted: rgba(127,127,127,1);
-  --hz-top: 40px;          /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
+  --hz-top: 58px;          /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
 }
-* { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; overflow: hidden; font-family: inherit; color: inherit; background: transparent; }
-#hz { position: absolute; inset: 0; padding: var(--hz-top) 14px 12px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
-.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.ist .l, .soll .l, .sec h3 { font-size: 12px; color: var(--hz-muted); font-weight: 500; margin: 0 0 2px; text-transform: none; }
-.ist .v { font-size: 40px; font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; }
-.ist .x { font-size: 12px; color: var(--hz-muted); margin-top: 4px; }
-.soll { display: flex; flex-direction: column; align-items: flex-end; }
-.soll .ctl { display: flex; align-items: center; gap: 6px; }
-.soll .v { font-size: 24px; font-weight: 500; min-width: 84px; text-align: center; font-variant-numeric: tabular-nums; }
-.rb { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--hz-line); background: var(--hz-bg); color: inherit; font-size: 20px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
-.rb:hover { background: var(--hz-bg2); }
-.mode { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 10px; border-radius: 999px; background: var(--hz-bg2); align-self: flex-start; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+body { font-family: 'Poppins', 'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 14px; line-height: 1.35; color: inherit; }
+button, select, input { font: inherit; color: inherit; }
+#hz { position: absolute; inset: 0; padding: var(--hz-top) 16px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.lbl { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--hz-muted); }
+
+/* Kopf: Ist und Soll */
+.head { display: flex; align-items: stretch; justify-content: space-between; gap: 12px; }
+.ist { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ist .v { font-size: 44px; font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.ist .v small { font-size: 18px; font-weight: 400; margin-left: 2px; color: var(--hz-muted); }
+.facts { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--hz-muted); }
+.facts span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.facts svg { width: 13px; height: 13px; flex: none; }
+.soll { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 6px; }
+.soll .ctl { display: flex; align-items: center; gap: 4px; }
+.soll .v { font-size: 26px; font-weight: 500; min-width: 76px; text-align: center; font-variant-numeric: tabular-nums; }
+.rb { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--hz-bg2); font-size: 22px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none; transition: background .15s, transform .1s; touch-action: manipulation; user-select: none; }
+.rb:hover { background: var(--hz-line); }
+.rb:active { transform: scale(.92); }
+.rb.sm { width: 38px; height: 38px; font-size: 19px; }
+.mode { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--hz-bg2); align-self: flex-start; max-width: 100%; }
 .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-.sec { border-top: 1px solid var(--hz-line); padding-top: 10px; }
-.row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
-.row .n { width: 120px; flex: none; display: flex; align-items: center; gap: 6px; font-size: 14px; }
-.row .n b { font-weight: 600; }
-.row .v { width: 64px; text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; flex: none; }
-input[type=range] { -webkit-appearance: none; appearance: none; flex: 1; min-width: 60px; height: 24px; background: none; margin: 0; --p: 50%; --c: var(--hz-accent); }
-input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--c) var(--p), var(--hz-line) var(--p)); }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--c); margin-top: -7px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
-input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--hz-line); }
-input[type=range]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--c); }
-input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--c); border: 2px solid #fff; }
-.wk { display: flex; align-items: center; gap: 10px; margin: 6px 0; cursor: pointer; border-radius: 8px; padding: 3px 4px; }
-.wk:hover, .wk.sel { background: var(--hz-bg); }
-.wk .d { width: 76px; flex: none; font-size: 13px; }
-.wk.today .d { font-weight: 700; }
-.bar { position: relative; flex: 1; height: 18px; border-radius: 4px; overflow: hidden; background: var(--hz-bg2); }
+
+/* Abschnitte */
+.card { background: var(--hz-bg); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.card .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 26px; }
+.sp { display: flex; flex-direction: column; gap: 4px; }
+.sp + .sp { border-top: 1px solid var(--hz-line); padding-top: 10px; }
+.sp .t { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sp .n { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.sp .badge { font-size: 10px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; color: #fff; }
+.sp .val { font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.sp .ctl { display: flex; align-items: center; gap: 10px; }
+
+input[type=range] { -webkit-appearance: none; appearance: none; flex: 1; min-width: 60px; height: 38px; background: none; margin: 0; --p: 50%; --c: var(--hz-accent); cursor: pointer; touch-action: pan-y; }
+input[type=range]:focus { outline: none; }
+input[type=range]::-webkit-slider-runnable-track { height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--c) var(--p), var(--hz-line) var(--p)); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; margin-top: -9px; border: 3px solid var(--c); box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+input[type=range]::-moz-range-track { height: 8px; border-radius: 4px; background: var(--hz-line); }
+input[type=range]::-moz-range-progress { height: 8px; border-radius: 4px; background: var(--c); }
+input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--c); }
+.scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--hz-muted); padding: 0 48px; margin-top: -6px; }
+
+/* Wochenprogramm */
+.wk { display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 10px; padding: 6px; margin: 0 -6px; touch-action: manipulation; }
+.wk:hover, .wk.sel { background: var(--hz-bg2); }
+.wk .d { width: 68px; flex: none; font-size: 13px; }
+.wk.today .d { font-weight: 600; color: var(--hz-accent); }
+.wk .chev { width: 16px; height: 16px; flex: none; color: var(--hz-muted); transition: transform .15s; }
+.wk.sel .chev { transform: rotate(90deg); }
+.bar { position: relative; flex: 1; height: 22px; border-radius: 6px; overflow: hidden; background: var(--hz-bg2); }
 .bar span { position: absolute; top: 0; bottom: 0; }
-.bar i { position: absolute; top: -2px; bottom: -2px; width: 2px; background: currentColor; }
-.ticks { display: flex; justify-content: space-between; margin-left: 90px; font-size: 10px; color: var(--hz-muted); }
-.ed { background: var(--hz-bg); border-radius: 10px; padding: 8px 10px; margin: 4px 0 8px; }
-.ed .pt { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
-.ed input[type=time], .ed select { font: inherit; color: inherit; background: var(--hz-bg); border: 1px solid var(--hz-line); border-radius: 8px; padding: 4px 6px; }
+.bar i { position: absolute; top: 0; bottom: 0; width: 3px; border-radius: 2px; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35); }
+.ticks { display: flex; justify-content: space-between; margin: -4px 26px 0 84px; font-size: 10px; color: var(--hz-muted); }
+.ed { border-radius: 12px; padding: 4px 0 2px; display: flex; flex-direction: column; gap: 8px; }
+.ed .pt { display: flex; align-items: center; gap: 8px; }
+.ed input[type=time], .ed select { font-size: 16px; min-height: 44px; background: var(--hz-bg2); border: 1px solid transparent; border-radius: 10px; padding: 6px 10px; }
+.ed input[type=time] { width: 112px; flex: none; }
 .ed select { flex: 1; min-width: 0; }
 .ed option { color: #000; }
-.x-btn { border: 0; background: none; color: var(--hz-muted); cursor: pointer; font-size: 16px; padding: 4px 6px; }
-.btn { border: 1px solid var(--hz-accent); background: none; color: var(--hz-accent); border-radius: 999px; padding: 5px 14px; cursor: pointer; font-weight: 600; font: inherit; font-size: 13px; }
-.hint { color: var(--hz-muted); font-size: 12px; }
-.sw { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
-.tg { position: relative; width: 38px; height: 22px; border-radius: 11px; background: var(--hz-line); border: 0; cursor: pointer; padding: 0; }
-.tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.x-btn { width: 44px; height: 44px; border: 0; border-radius: 50%; background: none; color: var(--hz-muted); cursor: pointer; font-size: 18px; flex: none; }
+.x-btn:hover { background: var(--hz-bg2); }
+.btn { align-self: flex-start; min-height: 40px; border: 1px solid var(--hz-accent); background: none; color: var(--hz-accent); border-radius: 999px; padding: 6px 16px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.hint { color: var(--hz-muted); font-size: 11px; }
+.tg { position: relative; width: 48px; height: 28px; border-radius: 14px; background: var(--hz-line); border: 0; cursor: pointer; padding: 0; flex: none; }
+.tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .15s; }
 .tg.on { background: var(--hz-accent); }
-.tg.on::after { left: 19px; }
+.tg.on::after { left: 23px; }
+.tgl { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--hz-muted); }
+
+/* schmal (Smartphone) */
+@media (max-width: 420px) {
+  #hz { padding-left: 12px; padding-right: 12px; }
+  .ist .v { font-size: 38px; }
+  .soll .v { font-size: 22px; min-width: 62px; }
+  .card { padding: 12px; }
+  .wk .d { width: 58px; font-size: 12px; }
+  .ticks { margin-left: 74px; }
+}
 /* kleine Kachel: nur Ist, Soll und Betriebsart */
-body.compact .sec, body.compact .soll .rb { display: none; }
-body.compact .ist .v { font-size: 32px; }
-body.compact .soll .v { min-width: 0; font-size: 20px; }
+body.compact .card, body.compact .hint, body.compact .soll .rb { display: none; }
+body.compact #hz { gap: 8px; }
+body.compact .ist .v { font-size: 34px; }
+body.compact .soll .v { min-width: 0; font-size: 22px; }
 </style>
 <div id="hz"></div>
 <script>
 var HZ = { s: null, busy: 0, pending: false, edit: null };
 var DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+var ICON = {
+  drop: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.7c-.3 0-.6.1-.8.4C9 6 5 11.2 5 14.9 5 18.8 8.1 22 12 22s7-3.2 7-7.1c0-3.7-4-8.9-6.2-11.8-.2-.3-.5-.4-.8-.4z"/></svg>',
+  valve: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h16M12 4v8M8 4h8M6 12v6h12v-6"/></svg>',
+  chev: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>'
+};
 
 function handleMessage(data) {
   try { HZ.s = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
@@ -76,23 +117,26 @@ function fmt(v, d) {
 function digits() { return HZ.s && HZ.s.step < 1 ? 1 : 0; }
 function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function pad(n) { return (n < 10 ? '0' : '') + n; }
+function hm(t) { return pad(Math.floor(t / 60)) + ':' + pad(t % 60); }
 function modeById(id) { var m = (HZ.s.modes || []).filter(function (x) { return x.id === id; }); return m[0] || null; }
 function dayNames(mask) {
   var r = [];
   for (var i = 0; i < 7; i++) if (mask & (1 << i)) r.push(DAYS[i]);
   if (r.length === 7) return 'Mo–So';
   if (r.length === 5 && (mask & 31) === 31) return 'Mo–Fr';
-  return r.join(' ');
+  if (r.length === 2 && (mask & 96) === 96) return 'Sa, So';
+  return r.join(', ');
 }
-function todayBit() { return 1 << ((new Date().getDay() + 6) % 7); }
+function dow() { return (new Date().getDay() + 6) % 7; }
 function nowMin() { var d = new Date(); return d.getHours() * 60 + d.getMinutes(); }
 function send(ident, value) { if (typeof requestAction === 'function') requestAction(ident, value); }
+function snap(v, m) { var st = HZ.s.step; v = Math.round(v / st) * st; return Math.round(Math.max(m.min, Math.min(m.max, v)) * 100) / 100; }
 
-/* nächster Schaltpunkt ab jetzt (heute oder an den Folgetagen) */
+/* nächster Wechsel der Betriebsart ab jetzt (heute oder an den Folgetagen) */
 function nextSwitch() {
-  var s = HZ.s, now = nowMin(), dow = (new Date().getDay() + 6) % 7;
+  var s = HZ.s, now = nowMin(), d0 = dow();
   for (var k = 0; k < 7; k++) {
-    var d = (dow + k) % 7, best = null;
+    var d = (d0 + k) % 7, best = null;
     (s.groups || []).forEach(function (g) {
       if (!(g.days & (1 << d))) return;
       g.points.forEach(function (p) {
@@ -109,15 +153,19 @@ function render() {
   var s = HZ.s, el = document.getElementById('hz');
   if (!s) return;
   document.body.classList.toggle('compact', window.innerHeight < 300);
-  var dg = digits(), h = '';
-  var cur = modeById(s.current);
+  var dg = digits(), h = '', cur = modeById(s.current);
 
-  h += '<div class="head"><div class="ist"><div class="l">Ist</div><div class="v">' + fmt(s.actual, 1) + '<span style="font-size:.5em"> °C</span></div>';
-  if (s.valve !== null) h += '<div class="x">Ventil ' + fmt(s.valve, 0) + ' %</div>';
-  h += '</div>';
+  // Kopf
+  h += '<div class="head"><div class="ist"><div class="lbl">Ist</div><div class="v">' + fmt(s.actual, 1) + '<small>°C</small></div><div class="facts">';
+  if (s.humidity) {
+    var hu = s.humidity, tip = 'Sensor ' + fmt(hu.raw, 0) + ' %' + (hu.ts !== null ? ' bei ' + fmt(hu.ts, 1) + ' °C' : '') + (hu.ah !== null ? ', absolut ' + fmt(hu.ah, 1) + ' g/m³' : '');
+    h += '<span title="' + esc(tip) + '">' + ICON.drop + fmt(hu.rh, 0) + ' %' + (hu.ah !== null ? ' · ' + fmt(hu.ah, 1) + ' g/m³' : '') + '</span>';
+  }
+  if (s.valve !== null) h += '<span>' + ICON.valve + 'Ventil ' + fmt(s.valve, 0) + ' %</span>';
+  h += '</div></div>';
   if (s.target) {
-    h += '<div class="soll"><div class="l">Soll</div><div class="ctl"><button class="rb" data-t="-1" title="Sollwert senken">−</button>'
-      + '<div class="v" id="tv">' + fmt(s.target.v, dg) + ' °C</div><button class="rb" data-t="1" title="Sollwert erhöhen">+</button></div></div>';
+    h += '<div class="soll"><div class="lbl">Soll</div><div class="ctl"><button class="rb" data-t="-1" aria-label="Sollwert senken">−</button>'
+      + '<div class="v" id="tv">' + fmt(s.target.v, dg) + '°</div><button class="rb" data-t="1" aria-label="Sollwert erhöhen">+</button></div></div>';
   }
   h += '</div>';
 
@@ -126,25 +174,29 @@ function render() {
   if (cur) {
     var nx = s.active ? nextSwitch() : null, txt = esc(cur.name);
     if (!s.active) txt += ' · Wochenplan aus';
-    else if (nx) { var nm = modeById(nx.a); txt += ' bis ' + (nx.k === 1 ? 'morgen ' : nx.k > 1 ? DAYS[((new Date().getDay() + 6) % 7 + nx.k) % 7] + ' ' : '') + pad(Math.floor(nx.t / 60)) + ':' + pad(nx.t % 60) + (nm ? ', dann ' + esc(nm.name) : ''); }
-    h += '<div class="mode"><span class="dot" style="background:' + cur.color + '"></span>' + txt + '</div>';
+    else if (nx) { var nm = modeById(nx.a); txt += ' bis ' + (nx.k === 1 ? 'morgen ' : nx.k > 1 ? DAYS[(dow() + nx.k) % 7] + ' ' : '') + hm(nx.t) + (nm ? ', dann ' + esc(nm.name) : ''); }
+    h += '<div class="mode"><span class="dot" style="background:' + cur.color + '"></span><span>' + txt + '</span></div>';
   }
 
   // Sollwerte je Betriebsart
-  h += '<div class="sec"><h3>Sollwerte</h3>';
+  h += '<div class="card"><div class="top"><span class="lbl">Sollwerte</span></div>';
   (s.modes || []).forEach(function (m) {
     if (m.v === null) return;
     var p = (m.v - m.min) / (m.max - m.min) * 100;
-    h += '<div class="row"><div class="n"><span class="dot" style="background:' + m.color + '"></span>' + (m.id === s.current ? '<b>' + esc(m.name) + '</b>' : esc(m.name)) + '</div>'
-      + '<input type="range" data-m="' + m.id + '" min="' + m.min + '" max="' + m.max + '" step="' + s.step + '" value="' + m.v + '" style="--p:' + p + '%;--c:' + m.color + '">'
-      + '<div class="v" id="mv' + m.id + '">' + fmt(m.v, dg) + ' °C</div></div>';
+    h += '<div class="sp"><div class="t"><div class="n"><span class="dot" style="background:' + m.color + '"></span>' + esc(m.name)
+      + (m.id === s.current && s.active ? ' <span class="badge" style="background:' + m.color + '">aktiv</span>' : '') + '</div>'
+      + '<div class="val" id="mv' + m.id + '">' + fmt(m.v, dg) + ' °C</div></div>'
+      + '<div class="ctl"><button class="rb sm" data-ms="-1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' senken">−</button>'
+      + '<input type="range" data-m="' + m.id + '" min="' + m.min + '" max="' + m.max + '" step="' + s.step + '" value="' + m.v + '" style="--p:' + p + '%;--c:' + m.color + '" aria-label="' + esc(m.name) + '">'
+      + '<button class="rb sm" data-ms="1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' erhöhen">+</button></div></div>';
   });
+  var m0 = (s.modes || []).filter(function (m) { return m.v !== null; })[0];
+  if (m0) h += '<div class="scale"><span>' + fmt(m0.min, 0) + '°</span><span>' + fmt(m0.max, 0) + '°</span></div>';
   h += '</div>';
 
   // Wochenprogramm
-  var tb = todayBit(), nm = nowMin();
-  h += '<div class="sec"><h3>Wochenprogramm</h3>';
-  h += '<div class="sw"><span>Wochenplan aktiv</span><button class="tg' + (s.active ? ' on' : '') + '" id="act" title="Wochenplan ein/aus"></button></div>';
+  var tb = 1 << dow(), nm2 = nowMin();
+  h += '<div class="card"><div class="top"><span class="lbl">Wochenprogramm</span><span class="tgl">' + (s.active ? 'aktiv' : 'aus') + '<button class="tg' + (s.active ? ' on' : '') + '" id="act" aria-label="Wochenplan ein/aus"></button></span></div>';
   (s.groups || []).forEach(function (g) {
     var today = (g.days & tb) !== 0;
     h += '<div class="wk' + (today ? ' today' : '') + (HZ.edit === g.id ? ' sel' : '') + '" data-g="' + g.id + '"><div class="d">' + dayNames(g.days) + '</div><div class="bar">';
@@ -152,23 +204,23 @@ function render() {
     var start = 0, act = (pts.length && pts[0].h === 0 && pts[0].m === 0) ? pts[0].a : last;
     pts.concat([{ h: 24, m: 0, a: null }]).forEach(function (p) {
       var t = p.h * 60 + p.m, mm = modeById(act);
-      if (t > start) h += '<span style="left:' + (start / 14.4) + '%;width:' + ((t - start) / 14.4) + '%;background:' + (mm ? mm.color : 'transparent') + '" title="' + pad(Math.floor(start / 60)) + ':' + pad(start % 60) + ' ' + (mm ? esc(mm.name) : '') + '"></span>';
+      if (t > start) h += '<span style="left:' + (start / 14.4) + '%;width:' + ((t - start) / 14.4) + '%;background:' + (mm ? mm.color : 'transparent') + '" title="' + hm(start) + ' ' + (mm ? esc(mm.name) : '') + '"></span>';
       start = t; if (p.a !== null) act = p.a;
     });
-    if (today) h += '<i style="left:calc(' + (nm / 14.4) + '% - 1px)"></i>';
-    h += '</div></div>';
+    if (today) h += '<i style="left:calc(' + (nm2 / 14.4) + '% - 1px)"></i>';
+    h += '</div>' + ICON.chev + '</div>';
     if (HZ.edit === g.id) {
       h += '<div class="ed">';
       g.points.forEach(function (p) {
         h += '<div class="pt"><input type="time" step="60" value="' + pad(p.h) + ':' + pad(p.m) + '" data-g="' + g.id + '" data-p="' + p.id + '" data-a="' + p.a + '"><select data-g="' + g.id + '" data-p="' + p.id + '">';
         (s.modes || []).forEach(function (m) { h += '<option value="' + m.id + '"' + (m.id === p.a ? ' selected' : '') + '>' + esc(m.name) + '</option>'; });
-        h += '</select><button class="x-btn" data-del="' + p.id + '" data-g="' + g.id + '" title="Schaltpunkt löschen">✕</button></div>';
+        h += '</select><button class="x-btn" data-del="' + p.id + '" data-g="' + g.id + '" aria-label="Schaltpunkt löschen">✕</button></div>';
       });
       h += '<button class="btn" data-add="' + g.id + '">+ Schaltpunkt</button></div>';
     }
   });
-  h += '<div class="ticks"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>';
-  h += '<div class="hint" style="margin-top:6px">Tageszeile antippen, um die Schaltpunkte zu bearbeiten. Eine Sollwertverstellung gilt bis zum nächsten Schaltpunkt.</div></div>';
+  h += '<div class="ticks"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div></div>';
+  h += '<div class="hint">Tageszeile antippen, um Schaltpunkte zu bearbeiten. Die Sollwertverstellung oben gilt bis zum nächsten Schaltpunkt.</div>';
 
   el.innerHTML = h;
   bind();
@@ -177,23 +229,39 @@ function render() {
 function hold() { HZ.busy++; }
 function release() { HZ.busy = Math.max(0, HZ.busy - 1); if (HZ.busy === 0 && HZ.pending) { HZ.pending = false; render(); } }
 
+/* Regler einer Betriebsart sichtbar setzen */
+function showMode(id, v) {
+  var m = modeById(id), r = document.querySelector('input[type=range][data-m="' + id + '"]');
+  if (r) { r.value = v; r.style.setProperty('--p', ((v - m.min) / (m.max - m.min) * 100) + '%'); }
+  document.getElementById('mv' + id).textContent = fmt(v, digits()) + ' °C';
+}
+
 function bind() {
-  var s = HZ.s, dg = digits();
+  var s = HZ.s;
   document.querySelectorAll('.rb[data-t]').forEach(function (b) {
     b.onclick = function () {
-      var v = Math.round((s.target.v + Number(b.dataset.t) * s.step) * 100) / 100;
-      v = Math.max(s.target.min, Math.min(s.target.max, v));
-      s.target.v = v; document.getElementById('tv').textContent = fmt(v, dg) + ' °C';
+      var v = snap(s.target.v + Number(b.dataset.t) * s.step, s.target);
+      if (v === s.target.v) return;
+      s.target.v = v; document.getElementById('tv').textContent = fmt(v, digits()) + '°';
       send('SetTarget', v);
+    };
+  });
+  document.querySelectorAll('.rb[data-ms]').forEach(function (b) {
+    b.onclick = function () {
+      var id = Number(b.dataset.m), m = modeById(id), v = snap(m.v + Number(b.dataset.ms) * s.step, m);
+      if (v === m.v) return;
+      m.v = v; showMode(id, v);
+      send('SetMode', JSON.stringify({ a: id, v: v }));
     };
   });
   document.querySelectorAll('input[type=range][data-m]').forEach(function (r) {
     var id = Number(r.dataset.m);
-    var upd = function () { var m = modeById(id); r.style.setProperty('--p', ((r.value - m.min) / (m.max - m.min) * 100) + '%'); document.getElementById('mv' + id).textContent = fmt(Number(r.value), dg) + ' °C'; };
-    r.addEventListener('pointerdown', hold);
-    r.addEventListener('touchstart', hold, { passive: true });
-    r.addEventListener('input', upd);
-    r.addEventListener('change', function () { upd(); modeById(id).v = Number(r.value); send('SetMode', JSON.stringify({ a: id, v: Number(r.value) })); HZ.busy = 1; release(); });
+    r.addEventListener('pointerdown', function () { if (!HZ.drag) { HZ.drag = true; hold(); } });
+    r.addEventListener('input', function () { showMode(id, Number(r.value)); });
+    r.addEventListener('change', function () {
+      var m = modeById(id), v = Number(r.value);
+      if (v !== m.v) { m.v = v; send('SetMode', JSON.stringify({ a: id, v: v })); }
+    });
   });
   var act = document.getElementById('act');
   if (act) act.onclick = function () { send('SetActive', !s.active); };
@@ -225,6 +293,10 @@ function bind() {
   });
 }
 
+/* Ende des Ziehens am Schieberegler (auch außerhalb des Reglers losgelassen) */
+['pointerup', 'pointercancel'].forEach(function (ev) {
+  document.addEventListener(ev, function () { if (HZ.drag) { HZ.drag = false; setTimeout(release, 80); } });
+});
 window.addEventListener('resize', function () { if (HZ.busy === 0) render(); });
 setInterval(function () { if (HZ.busy === 0) render(); }, 60000);
 </script>
