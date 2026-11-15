@@ -138,15 +138,10 @@ body.solo.compact .rb { width: 44px; height: 44px; font-size: 22px; }
 </style>
 <div id="hz"></div>
 <script>
-/*
- * Kleine Kachel: Soll, Ist, Betriebsart. Das Regler-Symbol öffnet die eigene Kachel maximiert (openObject, ab Symcon 8.2).
- * Große bzw. maximierte Kachel (ab 480 px Höhe): Wochenprogramm und Sollwerte immer offen.
- * Ohne openObject (ältere Visu) klappt das Symbol den Teil in der Kachel auf (HZ.open, nicht gemerkt).
- */
-var HZ = { s: null, busy: 0, pending: false, edit: null, open: false };
+// open: Wochenprogramm aufgeklappt; null = automatisch nach Kachelhöhe (große Kachel / Vergrößern-Ansicht offen)
+var HZ = { s: null, busy: 0, pending: false, edit: null, open: null };
 var AUTO_OPEN_H = 480;
-function isLarge() { return window.innerHeight >= AUTO_OPEN_H; }
-function isOpen() { return isLarge() || HZ.open; }
+function isOpen() { return HZ.open === null ? window.innerHeight >= AUTO_OPEN_H : HZ.open; }
 window.addEventListener('resize', function () { if (HZ.s && HZ.busy === 0) render(); });
 var DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 var ICON = {
@@ -159,6 +154,7 @@ var ICON = {
 function handleMessage(data) {
   try { HZ.s = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
   // gemerkter Klappzustand vom Modul (gilt nach Neuladen und auf allen Geräten); null = automatisch nach Kachelhöhe
+  if (typeof HZ.s.expanded === 'boolean') { if (HZ.open !== HZ.s.expanded && !HZ.s.expanded) HZ.edit = null; HZ.open = HZ.s.expanded; }
   if (HZ.busy > 0) { HZ.pending = true; return; }
   render();
 }
@@ -251,8 +247,7 @@ function render() {
     h += '<div class="mode"><span class="dot" style="background:' + cur.color + '"></span><span>' + txt + '</span></div>';
   }
   // Wochenprogramm wird nur zum Einstellen gebraucht: über das Regler-Symbol aufklappen (wie Klang in der Sonos-Kachel)
-  // Regler-Symbol nur in der kleinen Kachel; in der großen/maximierten Ansicht ist alles offen
-  if (hasPlan && !isLarge()) h += '<button class="ib' + (HZ.open ? ' on' : '') + '" id="more" aria-expanded="' + HZ.open + '" title="Wochenprogramm und Sollwerte öffnen">' + ICON.tune + '</button>';
+  if (hasPlan) h += '<button class="ib' + (isOpen() ? ' on' : '') + '" id="more" aria-expanded="' + isOpen() + '" title="Wochenprogramm und Sollwerte">' + ICON.tune + '</button>';
   h += '</div>';
 
   // ohne Wochenplan oder zugeklappt nur Ist, Soll und Betriebsart
@@ -319,12 +314,10 @@ function bind() {
   var s = HZ.s;
   var mo = document.getElementById('more');
   if (mo) mo.onclick = function () {
-    // bevorzugt: eigene Kachel maximiert öffnen (wie Vergrößern-Pfeil); dort ist alles offen
-    if (typeof openObject === 'function' && s.id) {
-      try { openObject(s.id); return; } catch (e) { /* weiter mit Aufklappen */ }
-    }
-    HZ.open = !HZ.open;
+    HZ.open = !isOpen();
     if (!HZ.open) HZ.edit = null;
+    HZ.s.expanded = HZ.open;
+    send('SetExpanded', HZ.open);   // Zustand im Modul merken
     render();
     var c = HZ.open && document.querySelector('.card');
     if (c && c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

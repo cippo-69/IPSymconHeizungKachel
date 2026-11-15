@@ -37,6 +37,7 @@ class HeizungKachel extends IPSModuleStrict
         $this->RegisterPropertyInteger('AccentColor', 0x5ECAAB); // Türkis der Symcon-Kachel-Visu
 
         $this->RegisterAttributeString('Watched', '[]');
+        $this->RegisterAttributeInteger('Expanded', -1); // Wochenprogramm: -1 automatisch nach Kachelhöhe, 0 zu, 1 auf (gemerkt)
 
         $this->SetVisualizationType(1);
     }
@@ -136,6 +137,9 @@ class HeizungKachel extends IPSModuleStrict
                     IPS_SetEventActive($eid, (bool) $Value);
                 }
                 break;
+            case 'SetExpanded':
+                $this->WriteAttributeInteger('Expanded', $Value ? 1 : 0);
+                break;
             case 'Refresh':
                 break;
             default:
@@ -221,7 +225,8 @@ class HeizungKachel extends IPSModuleStrict
     {
         $step = max(0.1, $this->ReadPropertyFloat('StepSize'));
         $state = ['step' => $step, 'hasActual' => $this->ReadPropertyInteger('ActualID') > 0, 'actual' => null, 'humidity' => null, 'target' => null, 'valve' => null, 'modes' => [], 'groups' => [], 'active' => false, 'current' => 0, 'error' => ''];
-        $state['id'] = $this->InstanceID; // für openObject: Regler-Symbol öffnet die eigene Kachel maximiert
+        $ex = $this->ReadAttributeInteger('Expanded');
+        $state['expanded'] = $ex < 0 ? null : $ex === 1;
 
         $aid = $this->ReadPropertyInteger('ActualID');
         if ($aid > 0 && @IPS_VariableExists($aid)) {
