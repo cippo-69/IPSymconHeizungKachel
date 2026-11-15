@@ -242,7 +242,7 @@ class HeizungKachel extends IPSModuleStrict
             $mode = ['id' => (int) $a['ID'], 'name' => (string) $a['Name'], 'color' => sprintf('#%06X', ((int) $a['Color']) & 0xFFFFFF), 'v' => null];
             if ($mvid > 0 && @IPS_VariableExists($mvid)) {
                 $r = $this->Range($mvid);
-                $mode += ['v' => (float) GetValue($mvid), 'min' => $r[0], 'max' => $r[1]];
+                $mode = ['id' => $mode['id'], 'name' => $mode['name'], 'color' => $mode['color'], 'v' => (float) GetValue($mvid), 'min' => $r[0], 'max' => $r[1]];
             }
             $state['modes'][] = $mode;
         }
