@@ -227,6 +227,8 @@ class HeizungKachel extends IPSModuleStrict
         $state = ['step' => $step, 'hasActual' => $this->ReadPropertyInteger('ActualID') > 0, 'actual' => null, 'humidity' => null, 'target' => null, 'valve' => null, 'modes' => [], 'groups' => [], 'active' => false, 'current' => 0, 'error' => ''];
         $ex = $this->ReadAttributeInteger('Expanded');
         $state['expanded'] = $ex < 0 ? null : $ex === 1;
+        // Regler-Symbol öffnet per openObject das Visu-Fenster des Sollwerts (Regler je Betriebsart + Wochenplan als Unterobjekte)
+        $state['targetId'] = $this->ReadPropertyInteger('TargetID');
 
         $aid = $this->ReadPropertyInteger('ActualID');
         if ($aid > 0 && @IPS_VariableExists($aid)) {

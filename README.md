@@ -13,7 +13,7 @@ Wochenprogramm und einem Schieberegler je Betriebsart (z. B. Heizbetrieb und Abs
 - **Wochenprogramm** als Tagesbalken je Gruppe; Antippen öffnet die Schaltpunkte (Zeit, Betriebsart, löschen,
   hinzufügen). Wochenplan ein/aus.
 
-Wochenprogramm und Sollwerte klappen automatisch nach der Kachelhöhe auf (ab 480 px) und lassen sich über das Regler-Symbol neben der Betriebsart auf- und zuklappen (wie Klang in der Sonos-Kachel). Der zuletzt gewählte Zustand wird im Modul gemerkt (gilt nach dem Neuladen und auf allen Geräten); bis dahin gilt die Automatik. Auch bei kleiner Kachel bleibt das Symbol erreichbar; aufgeklappt scrollt der Inhalt in der Kachel. Hinweis: Die maximierte Ansicht der Kachel-Visu (Vergrößern-Pfeil, openObject) zeigt HTML-SDK-Kacheln nicht an.
+Kleine Kachel: Sollwert, Ist und Betriebsart. Das Regler-Symbol neben der Betriebsart öffnet per `openObject` (ab Symcon 8.2) das Visu-Fenster der Sollwert-Variable; dort stehen Wochenplan und Regler je Betriebsart als Unterobjekte (Listen-Symbol oben rechts, Uhr-Symbol öffnet den Wochenplan). Voraussetzung: Die Sollwert-Variable ist in der Visu erreichbar (z. B. per Link) und Wochenplan sowie Betriebsart-Variablen liegen darunter. Große Kacheln (ab 480 px Höhe) zeigen Wochenprogramm und Sollwerte direkt. Ohne `openObject` klappt das Symbol den Teil in der Kachel auf (Zustand wird gemerkt). Hinweis: Die maximierte Ansicht der eigenen Kachel (Vergrößern-Pfeil) zeigt HTML-SDK-Kacheln nicht an.
 
 ## Voraussetzungen
 
