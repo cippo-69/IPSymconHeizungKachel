@@ -13,7 +13,9 @@
             { "type": "NumberSpinner", "name": "MaxTemp", "caption": "Maximum", "digits": 1, "suffix": " °C" }
         ] },
         { "type": "CheckBox", "name": "ApplyToCurrent", "caption": "Änderung der laufenden Betriebsart sofort als Sollwert übernehmen" },
-        { "type": "SelectColor", "name": "AccentColor", "caption": "Akzentfarbe" }
+        { "type": "SelectColor", "name": "AccentColor", "caption": "Akzentfarbe" },
+        { "type": "SelectCategory", "name": "DetailID", "caption": "Einstellungsseite (optional): Kategorie, die das Regler-Symbol öffnet", "width": "600px" },
+        { "type": "CheckBox", "name": "AlwaysOpen", "caption": "Wochenprogramm und Sollwerte immer zeigen (für die Instanz auf der Einstellungsseite)" }
     ],
     "actions": [],
     "status": [

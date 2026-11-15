@@ -35,6 +35,8 @@ class HeizungKachel extends IPSModuleStrict
         $this->RegisterPropertyFloat('MaxTemp', 24.0);
         $this->RegisterPropertyBoolean('ApplyToCurrent', true);
         $this->RegisterPropertyInteger('AccentColor', 0x5ECAAB); // Türkis der Symcon-Kachel-Visu
+        $this->RegisterPropertyInteger('DetailID', 0);     // optional: Kategorie (Einstellungsseite), die das Regler-Symbol per openObject öffnet
+        $this->RegisterPropertyBoolean('AlwaysOpen', false); // Wochenprogramm und Sollwerte immer zeigen (Instanz auf der Einstellungsseite)
 
         $this->RegisterAttributeString('Watched', '[]');
         $this->RegisterAttributeInteger('Expanded', -1); // Wochenprogramm: -1 automatisch nach Kachelhöhe, 0 zu, 1 auf (gemerkt)
@@ -229,6 +231,9 @@ class HeizungKachel extends IPSModuleStrict
         $state['expanded'] = $ex < 0 ? null : $ex === 1;
         // Regler-Symbol öffnet per openObject das Visu-Fenster des Sollwerts (Regler je Betriebsart + Wochenplan als Unterobjekte)
         $state['targetId'] = $this->ReadPropertyInteger('TargetID');
+        $did = $this->ReadPropertyInteger('DetailID');
+        $state['detailId'] = ($did > 0 && @IPS_ObjectExists($did)) ? $did : 0;
+        $state['alwaysOpen'] = $this->ReadPropertyBoolean('AlwaysOpen');
 
         $aid = $this->ReadPropertyInteger('ActualID');
         if ($aid > 0 && @IPS_VariableExists($aid)) {

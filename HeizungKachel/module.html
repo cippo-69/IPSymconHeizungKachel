@@ -146,8 +146,9 @@ var AUTO_OPEN_H = 480;
  * Regler je Betriebsart und Wochenplan sind dort Unterobjekte. Die kleine Kachel klappt dann nicht auf,
  * große Kacheln (ab 480 px) zeigen weiter alles. Ohne openObject: Aufklappen in der Kachel (Zustand gemerkt).
  */
-function canOpenWindow() { return typeof openObject === 'function' && HZ.s && HZ.s.targetId > 0; }
+function canOpenWindow() { return typeof openObject === 'function' && HZ.s && (HZ.s.detailId > 0 || HZ.s.targetId > 0); }
 function isOpen() {
+  if (HZ.s && HZ.s.alwaysOpen) return true;   // Instanz auf der Einstellungsseite
   if (canOpenWindow()) return window.innerHeight >= AUTO_OPEN_H;
   return HZ.open === null ? window.innerHeight >= AUTO_OPEN_H : HZ.open;
 }
@@ -258,7 +259,7 @@ function render() {
   // Wochenprogramm wird nur zum Einstellen gebraucht: über das Regler-Symbol aufklappen (wie Klang in der Sonos-Kachel)
   // Regler-Symbol: öffnet das Fenster mit Sollwerten und Wochenplan (bzw. klappt ohne openObject auf); in großen Kacheln ist alles sichtbar
   var win = canOpenWindow();
-  if (hasPlan && !(win && isOpen())) h += '<button class="ib' + (!win && isOpen() ? ' on' : '') + '" id="more" aria-expanded="' + isOpen() + '" title="Wochenprogramm und Sollwerte">' + ICON.tune + '</button>';
+  if (hasPlan && !s.alwaysOpen && !(win && isOpen())) h += '<button class="ib' + (!win && isOpen() ? ' on' : '') + '" id="more" aria-expanded="' + isOpen() + '" title="Wochenprogramm und Sollwerte">' + ICON.tune + '</button>';
   h += '</div>';
 
   // ohne Wochenplan oder zugeklappt nur Ist, Soll und Betriebsart
@@ -326,7 +327,8 @@ function bind() {
   var mo = document.getElementById('more');
   if (mo) mo.onclick = function () {
     if (canOpenWindow()) {
-      try { openObject(s.targetId); return; } catch (e) { /* sonst in der Kachel aufklappen */ }
+      // bevorzugt die Einstellungsseite (Kategorie mit der Kachel „immer offen“), sonst das Visu-Fenster des Sollwerts
+      try { openObject(s.detailId > 0 ? s.detailId : s.targetId); return; } catch (e) { /* sonst in der Kachel aufklappen */ }
     }
     HZ.open = !isOpen();
     if (!HZ.open) HZ.edit = null;
