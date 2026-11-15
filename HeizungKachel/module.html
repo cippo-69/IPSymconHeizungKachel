@@ -259,6 +259,8 @@ function render() {
   // Wochenprogramm wird nur zum Einstellen gebraucht: über das Regler-Symbol aufklappen (wie Klang in der Sonos-Kachel)
   // Regler-Symbol: öffnet das Fenster mit Sollwerten und Wochenplan (bzw. klappt ohne openObject auf); in großen Kacheln ist alles sichtbar
   var win = canOpenWindow();
+  // Einstellungsseite: aktives Regler-Symbol = schließen, zurück zur Raumseite
+  if (s.alwaysOpen && s.backId > 0 && typeof openObject === 'function') h += '<button class="ib on" id="back" aria-label="Schließen, zurück zum Raum" title="Schließen">' + ICON.tune + '</button>';
   if (hasPlan && !s.alwaysOpen && !(win && isOpen())) h += '<button class="ib' + (!win && isOpen() ? ' on' : '') + '" id="more" aria-expanded="' + isOpen() + '" title="Wochenprogramm und Sollwerte">' + ICON.tune + '</button>';
   h += '</div>';
 
@@ -324,6 +326,8 @@ function showMode(id, v) {
 
 function bind() {
   var s = HZ.s;
+  var bk = document.getElementById('back');
+  if (bk) bk.onclick = function () { try { openObject(s.backId); } catch (e) { /* nichts */ } };
   var mo = document.getElementById('more');
   if (mo) mo.onclick = function () {
     if (canOpenWindow()) {

@@ -234,6 +234,13 @@ class HeizungKachel extends IPSModuleStrict
         $did = $this->ReadPropertyInteger('DetailID');
         $state['detailId'] = ($did > 0 && @IPS_ObjectExists($did)) ? $did : 0;
         $state['alwaysOpen'] = $this->ReadPropertyBoolean('AlwaysOpen');
+        // Einstellungsseite: aktives Regler-Symbol führt zurück auf die übergeordnete Seite (Raum = Eltern der Kategorie, in der die Instanz liegt)
+        $state['backId'] = 0;
+        if ($state['alwaysOpen']) {
+            $cat = IPS_GetParent($this->InstanceID);
+            $up = $cat > 0 ? IPS_GetParent($cat) : 0;
+            $state['backId'] = ($up > 0 && IPS_GetObject($up)['ObjectType'] === 0) ? $up : 0;
+        }
 
         $aid = $this->ReadPropertyInteger('ActualID');
         if ($aid > 0 && @IPS_VariableExists($aid)) {
