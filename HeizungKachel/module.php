@@ -58,8 +58,9 @@ class HeizungKachel extends IPSModuleStrict
             $this->ReadPropertyInteger('HumidityID'), $this->ReadPropertyInteger('HumidityTempID')
         ];
         $eid = $this->ReadPropertyInteger('ScheduleID');
-        $ok = $eid > 0 && @IPS_EventExists($eid) && IPS_GetEvent($eid)['EventType'] === 2;
-        if ($ok) {
+        $hasSchedule = $eid > 0 && @IPS_EventExists($eid) && IPS_GetEvent($eid)['EventType'] === 2;
+        $ok = $eid === 0 || $hasSchedule; // ohne Wochenplan: nur Ist und Soll
+        if ($hasSchedule) {
             $this->RegisterReference($eid);
             foreach (self::EVENT_MESSAGES as $c) {
                 if (defined($c)) {
@@ -219,7 +220,7 @@ class HeizungKachel extends IPSModuleStrict
     private function BuildState(): array
     {
         $step = max(0.1, $this->ReadPropertyFloat('StepSize'));
-        $state = ['step' => $step, 'actual' => null, 'humidity' => null, 'target' => null, 'valve' => null, 'modes' => [], 'groups' => [], 'active' => false, 'current' => 0, 'error' => ''];
+        $state = ['step' => $step, 'hasActual' => $this->ReadPropertyInteger('ActualID') > 0, 'actual' => null, 'humidity' => null, 'target' => null, 'valve' => null, 'modes' => [], 'groups' => [], 'active' => false, 'current' => 0, 'error' => ''];
 
         $aid = $this->ReadPropertyInteger('ActualID');
         if ($aid > 0 && @IPS_VariableExists($aid)) {
@@ -238,7 +239,9 @@ class HeizungKachel extends IPSModuleStrict
 
         $sched = $this->Schedule();
         if ($sched === null) {
-            $state['error'] = 'Kein Wochenplan ausgewählt';
+            if ($this->ReadPropertyInteger('ScheduleID') > 0) {
+                $state['error'] = 'Wochenplan nicht gefunden';
+            }
             return $state;
         }
         $state['active'] = (bool) $sched['EventActive'];

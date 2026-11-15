@@ -2,7 +2,7 @@
     "elements": [
         { "type": "SelectVariable", "name": "ActualID", "caption": "Ist-Temperatur", "width": "600px" },
         { "type": "SelectVariable", "name": "TargetID", "caption": "Sollwert (aktuell, vom Wochenplan gesetzt)", "width": "600px" },
-        { "type": "SelectEvent", "name": "ScheduleID", "caption": "Wochenplan", "width": "600px" },
+        { "type": "SelectEvent", "name": "ScheduleID", "caption": "Wochenplan (optional; ohne Wochenplan nur Ist und Soll)", "width": "600px" },
         { "type": "SelectVariable", "name": "ValveID", "caption": "Ventilposition in % (optional)", "width": "600px" },
         { "type": "SelectVariable", "name": "HumidityID", "caption": "Luftfeuchte eines Raumsensors in % (optional)", "width": "600px" },
         { "type": "SelectVariable", "name": "HumidityTempID", "caption": "Temperatur desselben Sensors (optional, für die Umrechnung auf die Ist-Temperatur)", "width": "600px" },
@@ -18,7 +18,7 @@
     "actions": [],
     "status": [
         { "code": 102, "icon": "active", "caption": "Aktiv" },
-        { "code": 201, "icon": "error", "caption": "Kein gültiger Wochenplan ausgewählt" },
+        { "code": 201, "icon": "error", "caption": "Der ausgewählte Wochenplan existiert nicht" },
         { "code": 202, "icon": "error", "caption": "Keine gültige Sollwert-Variable ausgewählt" }
     ]
 }

@@ -29,6 +29,9 @@ button, select, input { font: inherit; color: var(--hz-fg); }
 
 /* Kopf: Ist und Soll */
 .head { display: flex; align-items: stretch; justify-content: space-between; gap: 12px; }
+.head.solo { justify-content: flex-start; }
+.head.solo .ist { display: none; }
+.head.solo .soll { align-items: flex-start; }
 .ist { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .ist .v { font-size: 44px; font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
 .ist .v small { font-size: 18px; font-weight: 400; margin-left: 2px; color: var(--hz-muted); }
@@ -186,7 +189,7 @@ function render() {
   var dg = digits(), h = '', cur = modeById(s.current);
 
   // Kopf
-  h += '<div class="head"><div class="ist"><div class="lbl">Ist</div><div class="v">' + fmt(s.actual, 1) + '<small>°C</small></div><div class="facts">';
+  h += '<div class="head' + (s.hasActual || s.humidity || s.valve !== null ? '' : ' solo') + '"><div class="ist">' + (s.hasActual ? '<div class="lbl">Ist</div><div class="v">' + fmt(s.actual, 1) + '<small>°C</small></div>' : '') + '<div class="facts">';
   if (s.humidity) {
     var hu = s.humidity, tip = 'Sensor ' + fmt(hu.raw, 0) + ' %' + (hu.ts !== null ? ' bei ' + fmt(hu.ts, 1) + ' °C' : '') + (hu.ah !== null ? ', absolut ' + fmt(hu.ah, 1) + ' g/m³' : '');
     h += '<span title="' + esc(tip) + '">' + ICON.drop + fmt(hu.rh, 0) + ' %' + (hu.ah !== null ? ' · ' + fmt(hu.ah, 1) + ' g/m³' : '') + '</span>';
@@ -207,6 +210,9 @@ function render() {
     else if (nx) { var nm = modeById(nx.a); txt += ' bis ' + (nx.k === 1 ? 'morgen ' : nx.k > 1 ? DAYS[(dow() + nx.k) % 7] + ' ' : '') + hm(nx.t) + (nm ? ', dann ' + esc(nm.name) : ''); }
     h += '<div class="mode"><span class="dot" style="background:' + cur.color + '"></span><span>' + txt + '</span></div>';
   }
+
+  // ohne Wochenplan nur Ist und Soll
+  if (!(s.modes || []).length && !(s.groups || []).length) { el.innerHTML = h; bind(); return; }
 
   // Wochenprogramm mit Schaltpunkten, darunter die Sollwerte je Betriebsart
   var tb = 1 << dow(), nm2 = nowMin();
