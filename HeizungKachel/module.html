@@ -106,7 +106,7 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 
   .ticks { margin-left: 74px; }
 }
 /* kleine Kachel: nur Ist, Soll und Betriebsart */
-body.compact .card, body.compact .hint, body.compact .soll .rb { display: none; }
+body.compact .card, body.compact .hint { display: none; }
 body.compact #hz { gap: 8px; }
 body.compact .ist .v { font-size: 34px; }
 body.compact .soll .v { min-width: 0; font-size: 22px; }
@@ -168,12 +168,13 @@ function nextSwitch() {
 
 /*
  * Hell/Dunkel erkennen: Die Kachel-Visu gibt die Textfarbe an die Seite weiter (helle Schrift = Dark Mode).
- * Ohne Vorgabe entscheidet die Systemeinstellung.
+ * Schwarze Schrift bedeutet hellen Modus. Nur ohne lesbare Farbe entscheidet die Systemeinstellung.
  */
 function theme() {
   var b = document.body;
   var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(b).color || ''), dark;
-  if (m && !(m[1] === '0' && m[2] === '0' && m[3] === '0')) {
+  // Schriftfarbe der Visu ist maßgeblich (auch Schwarz = heller Modus); die Systemeinstellung nur, wenn keine Farbe lesbar ist
+  if (m) {
     dark = (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255 > 0.5;
   } else {
     dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
