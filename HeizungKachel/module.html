@@ -320,7 +320,8 @@ function bind() {
     send('SetExpanded', HZ.open);   // Zustand im Modul merken
     render();
     var c = HZ.open && document.querySelector('.card');
-    if (c && c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // nur innerhalb der Kachel scrollen (scrollIntoView würde auch die Visu um die Kachel herum verschieben)
+    if (c) { var hz = document.getElementById('hz'); hz.scrollTo({ top: Math.max(0, c.offsetTop - 8), behavior: 'smooth' }); }
   };
   document.querySelectorAll('.rb[data-t]').forEach(function (b) {
     b.onclick = function () {
