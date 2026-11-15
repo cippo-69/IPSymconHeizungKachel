@@ -1,0 +1,22 @@
+{
+    "elements": [
+        { "type": "SelectVariable", "name": "ActualID", "caption": "Ist-Temperatur", "width": "600px" },
+        { "type": "SelectVariable", "name": "TargetID", "caption": "Sollwert (aktuell, vom Wochenplan gesetzt)", "width": "600px" },
+        { "type": "SelectEvent", "name": "ScheduleID", "caption": "Wochenplan", "width": "600px" },
+        { "type": "SelectVariable", "name": "ValveID", "caption": "Ventilposition in % (optional)", "width": "600px" },
+        { "type": "Label", "caption": "Die Schieberegler je Betriebsart ergeben sich aus den Aktionen des Wochenplans (Aktion „Variable auf Wert einer Variable setzen“)." },
+        { "type": "NumberSpinner", "name": "StepSize", "caption": "Schrittweite", "digits": 1, "suffix": " K" },
+        { "type": "RowLayout", "items": [
+            { "type": "NumberSpinner", "name": "MinTemp", "caption": "Minimum (Fallback)", "digits": 1, "suffix": " °C" },
+            { "type": "NumberSpinner", "name": "MaxTemp", "caption": "Maximum (Fallback)", "digits": 1, "suffix": " °C" }
+        ] },
+        { "type": "CheckBox", "name": "ApplyToCurrent", "caption": "Änderung der laufenden Betriebsart sofort als Sollwert übernehmen" },
+        { "type": "SelectColor", "name": "AccentColor", "caption": "Akzentfarbe" }
+    ],
+    "actions": [],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Aktiv" },
+        { "code": 201, "icon": "error", "caption": "Kein gültiger Wochenplan ausgewählt" },
+        { "code": 202, "icon": "error", "caption": "Keine gültige Sollwert-Variable ausgewählt" }
+    ]
+}

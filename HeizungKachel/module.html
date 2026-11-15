@@ -1,0 +1,230 @@
+<style>
+:root {
+  --hz-accent: #E8590C;
+  --hz-bg: rgba(127,127,127,.07);
+  --hz-bg2: rgba(127,127,127,.14);
+  --hz-line: rgba(127,127,127,.22);
+  --hz-muted: rgba(127,127,127,1);
+  --hz-top: 40px;          /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; font-family: inherit; color: inherit; background: transparent; }
+#hz { position: absolute; inset: 0; padding: var(--hz-top) 14px 12px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.ist .l, .soll .l, .sec h3 { font-size: 12px; color: var(--hz-muted); font-weight: 500; margin: 0 0 2px; text-transform: none; }
+.ist .v { font-size: 40px; font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; }
+.ist .x { font-size: 12px; color: var(--hz-muted); margin-top: 4px; }
+.soll { display: flex; flex-direction: column; align-items: flex-end; }
+.soll .ctl { display: flex; align-items: center; gap: 6px; }
+.soll .v { font-size: 24px; font-weight: 500; min-width: 84px; text-align: center; font-variant-numeric: tabular-nums; }
+.rb { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--hz-line); background: var(--hz-bg); color: inherit; font-size: 20px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+.rb:hover { background: var(--hz-bg2); }
+.mode { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 10px; border-radius: 999px; background: var(--hz-bg2); align-self: flex-start; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.sec { border-top: 1px solid var(--hz-line); padding-top: 10px; }
+.row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.row .n { width: 120px; flex: none; display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.row .n b { font-weight: 600; }
+.row .v { width: 64px; text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; flex: none; }
+input[type=range] { -webkit-appearance: none; appearance: none; flex: 1; min-width: 60px; height: 24px; background: none; margin: 0; --p: 50%; --c: var(--hz-accent); }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--c) var(--p), var(--hz-line) var(--p)); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--c); margin-top: -7px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--hz-line); }
+input[type=range]::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--c); }
+input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--c); border: 2px solid #fff; }
+.wk { display: flex; align-items: center; gap: 10px; margin: 6px 0; cursor: pointer; border-radius: 8px; padding: 3px 4px; }
+.wk:hover, .wk.sel { background: var(--hz-bg); }
+.wk .d { width: 76px; flex: none; font-size: 13px; }
+.wk.today .d { font-weight: 700; }
+.bar { position: relative; flex: 1; height: 18px; border-radius: 4px; overflow: hidden; background: var(--hz-bg2); }
+.bar span { position: absolute; top: 0; bottom: 0; }
+.bar i { position: absolute; top: -2px; bottom: -2px; width: 2px; background: currentColor; }
+.ticks { display: flex; justify-content: space-between; margin-left: 90px; font-size: 10px; color: var(--hz-muted); }
+.ed { background: var(--hz-bg); border-radius: 10px; padding: 8px 10px; margin: 4px 0 8px; }
+.ed .pt { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.ed input[type=time], .ed select { font: inherit; color: inherit; background: var(--hz-bg); border: 1px solid var(--hz-line); border-radius: 8px; padding: 4px 6px; }
+.ed select { flex: 1; min-width: 0; }
+.ed option { color: #000; }
+.x-btn { border: 0; background: none; color: var(--hz-muted); cursor: pointer; font-size: 16px; padding: 4px 6px; }
+.btn { border: 1px solid var(--hz-accent); background: none; color: var(--hz-accent); border-radius: 999px; padding: 5px 14px; cursor: pointer; font-weight: 600; font: inherit; font-size: 13px; }
+.hint { color: var(--hz-muted); font-size: 12px; }
+.sw { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+.tg { position: relative; width: 38px; height: 22px; border-radius: 11px; background: var(--hz-line); border: 0; cursor: pointer; padding: 0; }
+.tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.tg.on { background: var(--hz-accent); }
+.tg.on::after { left: 19px; }
+/* kleine Kachel: nur Ist, Soll und Betriebsart */
+body.compact .sec, body.compact .soll .rb { display: none; }
+body.compact .ist .v { font-size: 32px; }
+body.compact .soll .v { min-width: 0; font-size: 20px; }
+</style>
+<div id="hz"></div>
+<script>
+var HZ = { s: null, busy: 0, pending: false, edit: null };
+var DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+function handleMessage(data) {
+  try { HZ.s = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
+  if (HZ.busy > 0) { HZ.pending = true; return; }
+  render();
+}
+
+function fmt(v, d) {
+  if (v === null || v === undefined || isNaN(v)) return '–';
+  return Number(v).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function digits() { return HZ.s && HZ.s.step < 1 ? 1 : 0; }
+function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function modeById(id) { var m = (HZ.s.modes || []).filter(function (x) { return x.id === id; }); return m[0] || null; }
+function dayNames(mask) {
+  var r = [];
+  for (var i = 0; i < 7; i++) if (mask & (1 << i)) r.push(DAYS[i]);
+  if (r.length === 7) return 'Mo–So';
+  if (r.length === 5 && (mask & 31) === 31) return 'Mo–Fr';
+  return r.join(' ');
+}
+function todayBit() { return 1 << ((new Date().getDay() + 6) % 7); }
+function nowMin() { var d = new Date(); return d.getHours() * 60 + d.getMinutes(); }
+function send(ident, value) { if (typeof requestAction === 'function') requestAction(ident, value); }
+
+/* nächster Schaltpunkt ab jetzt (heute oder an den Folgetagen) */
+function nextSwitch() {
+  var s = HZ.s, now = nowMin(), dow = (new Date().getDay() + 6) % 7;
+  for (var k = 0; k < 7; k++) {
+    var d = (dow + k) % 7, best = null;
+    (s.groups || []).forEach(function (g) {
+      if (!(g.days & (1 << d))) return;
+      g.points.forEach(function (p) {
+        var t = p.h * 60 + p.m;
+        if ((k > 0 || t > now) && p.a !== s.current && (best === null || t < best.t)) best = { t: t, a: p.a, k: k };
+      });
+    });
+    if (best) return best;
+  }
+  return null;
+}
+
+function render() {
+  var s = HZ.s, el = document.getElementById('hz');
+  if (!s) return;
+  document.body.classList.toggle('compact', window.innerHeight < 300);
+  var dg = digits(), h = '';
+  var cur = modeById(s.current);
+
+  h += '<div class="head"><div class="ist"><div class="l">Ist</div><div class="v">' + fmt(s.actual, 1) + '<span style="font-size:.5em"> °C</span></div>';
+  if (s.valve !== null) h += '<div class="x">Ventil ' + fmt(s.valve, 0) + ' %</div>';
+  h += '</div>';
+  if (s.target) {
+    h += '<div class="soll"><div class="l">Soll</div><div class="ctl"><button class="rb" data-t="-1" title="Sollwert senken">−</button>'
+      + '<div class="v" id="tv">' + fmt(s.target.v, dg) + ' °C</div><button class="rb" data-t="1" title="Sollwert erhöhen">+</button></div></div>';
+  }
+  h += '</div>';
+
+  if (s.error) { el.innerHTML = h + '<div class="hint">' + esc(s.error) + '</div>'; bind(); return; }
+
+  if (cur) {
+    var nx = s.active ? nextSwitch() : null, txt = esc(cur.name);
+    if (!s.active) txt += ' · Wochenplan aus';
+    else if (nx) { var nm = modeById(nx.a); txt += ' bis ' + (nx.k === 1 ? 'morgen ' : nx.k > 1 ? DAYS[((new Date().getDay() + 6) % 7 + nx.k) % 7] + ' ' : '') + pad(Math.floor(nx.t / 60)) + ':' + pad(nx.t % 60) + (nm ? ', dann ' + esc(nm.name) : ''); }
+    h += '<div class="mode"><span class="dot" style="background:' + cur.color + '"></span>' + txt + '</div>';
+  }
+
+  // Sollwerte je Betriebsart
+  h += '<div class="sec"><h3>Sollwerte</h3>';
+  (s.modes || []).forEach(function (m) {
+    if (m.v === null) return;
+    var p = (m.v - m.min) / (m.max - m.min) * 100;
+    h += '<div class="row"><div class="n"><span class="dot" style="background:' + m.color + '"></span>' + (m.id === s.current ? '<b>' + esc(m.name) + '</b>' : esc(m.name)) + '</div>'
+      + '<input type="range" data-m="' + m.id + '" min="' + m.min + '" max="' + m.max + '" step="' + s.step + '" value="' + m.v + '" style="--p:' + p + '%;--c:' + m.color + '">'
+      + '<div class="v" id="mv' + m.id + '">' + fmt(m.v, dg) + ' °C</div></div>';
+  });
+  h += '</div>';
+
+  // Wochenprogramm
+  var tb = todayBit(), nm = nowMin();
+  h += '<div class="sec"><h3>Wochenprogramm</h3>';
+  h += '<div class="sw"><span>Wochenplan aktiv</span><button class="tg' + (s.active ? ' on' : '') + '" id="act" title="Wochenplan ein/aus"></button></div>';
+  (s.groups || []).forEach(function (g) {
+    var today = (g.days & tb) !== 0;
+    h += '<div class="wk' + (today ? ' today' : '') + (HZ.edit === g.id ? ' sel' : '') + '" data-g="' + g.id + '"><div class="d">' + dayNames(g.days) + '</div><div class="bar">';
+    var pts = g.points, last = pts.length ? pts[pts.length - 1].a : 0;
+    var start = 0, act = (pts.length && pts[0].h === 0 && pts[0].m === 0) ? pts[0].a : last;
+    pts.concat([{ h: 24, m: 0, a: null }]).forEach(function (p) {
+      var t = p.h * 60 + p.m, mm = modeById(act);
+      if (t > start) h += '<span style="left:' + (start / 14.4) + '%;width:' + ((t - start) / 14.4) + '%;background:' + (mm ? mm.color : 'transparent') + '" title="' + pad(Math.floor(start / 60)) + ':' + pad(start % 60) + ' ' + (mm ? esc(mm.name) : '') + '"></span>';
+      start = t; if (p.a !== null) act = p.a;
+    });
+    if (today) h += '<i style="left:calc(' + (nm / 14.4) + '% - 1px)"></i>';
+    h += '</div></div>';
+    if (HZ.edit === g.id) {
+      h += '<div class="ed">';
+      g.points.forEach(function (p) {
+        h += '<div class="pt"><input type="time" step="60" value="' + pad(p.h) + ':' + pad(p.m) + '" data-g="' + g.id + '" data-p="' + p.id + '" data-a="' + p.a + '"><select data-g="' + g.id + '" data-p="' + p.id + '">';
+        (s.modes || []).forEach(function (m) { h += '<option value="' + m.id + '"' + (m.id === p.a ? ' selected' : '') + '>' + esc(m.name) + '</option>'; });
+        h += '</select><button class="x-btn" data-del="' + p.id + '" data-g="' + g.id + '" title="Schaltpunkt löschen">✕</button></div>';
+      });
+      h += '<button class="btn" data-add="' + g.id + '">+ Schaltpunkt</button></div>';
+    }
+  });
+  h += '<div class="ticks"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>';
+  h += '<div class="hint" style="margin-top:6px">Tageszeile antippen, um die Schaltpunkte zu bearbeiten. Eine Sollwertverstellung gilt bis zum nächsten Schaltpunkt.</div></div>';
+
+  el.innerHTML = h;
+  bind();
+}
+
+function hold() { HZ.busy++; }
+function release() { HZ.busy = Math.max(0, HZ.busy - 1); if (HZ.busy === 0 && HZ.pending) { HZ.pending = false; render(); } }
+
+function bind() {
+  var s = HZ.s, dg = digits();
+  document.querySelectorAll('.rb[data-t]').forEach(function (b) {
+    b.onclick = function () {
+      var v = Math.round((s.target.v + Number(b.dataset.t) * s.step) * 100) / 100;
+      v = Math.max(s.target.min, Math.min(s.target.max, v));
+      s.target.v = v; document.getElementById('tv').textContent = fmt(v, dg) + ' °C';
+      send('SetTarget', v);
+    };
+  });
+  document.querySelectorAll('input[type=range][data-m]').forEach(function (r) {
+    var id = Number(r.dataset.m);
+    var upd = function () { var m = modeById(id); r.style.setProperty('--p', ((r.value - m.min) / (m.max - m.min) * 100) + '%'); document.getElementById('mv' + id).textContent = fmt(Number(r.value), dg) + ' °C'; };
+    r.addEventListener('pointerdown', hold);
+    r.addEventListener('touchstart', hold, { passive: true });
+    r.addEventListener('input', upd);
+    r.addEventListener('change', function () { upd(); modeById(id).v = Number(r.value); send('SetMode', JSON.stringify({ a: id, v: Number(r.value) })); HZ.busy = 1; release(); });
+  });
+  var act = document.getElementById('act');
+  if (act) act.onclick = function () { send('SetActive', !s.active); };
+  document.querySelectorAll('.wk[data-g]').forEach(function (w) {
+    w.onclick = function () { var g = Number(w.dataset.g); HZ.edit = HZ.edit === g ? null : g; render(); };
+  });
+  document.querySelectorAll('.ed input[type=time]').forEach(function (t) {
+    t.addEventListener('focus', hold);
+    t.addEventListener('blur', function () {
+      var v = t.value.split(':');
+      if (v.length >= 2 && t.value !== t.defaultValue) send('SetPoint', JSON.stringify({ g: Number(t.dataset.g), p: Number(t.dataset.p), h: Number(v[0]), m: Number(v[1]), a: Number(t.dataset.a) }));
+      release();
+    });
+  });
+  document.querySelectorAll('.ed select').forEach(function (sel) {
+    sel.onchange = function () {
+      var t = sel.parentNode.querySelector('input[type=time]').value.split(':');
+      send('SetPoint', JSON.stringify({ g: Number(sel.dataset.g), p: Number(sel.dataset.p), h: Number(t[0]), m: Number(t[1]), a: Number(sel.value) }));
+    };
+  });
+  document.querySelectorAll('[data-del]').forEach(function (b) {
+    b.onclick = function () { send('DeletePoint', JSON.stringify({ g: Number(b.dataset.g), p: Number(b.dataset.del) })); };
+  });
+  document.querySelectorAll('[data-add]').forEach(function (b) {
+    b.onclick = function () {
+      var a = (s.modes && s.modes.length) ? s.modes[0].id : 0, d = new Date();
+      send('SetPoint', JSON.stringify({ g: Number(b.dataset.add), p: -1, h: d.getHours(), m: 0, a: a }));
+    };
+  });
+}
+
+window.addEventListener('resize', function () { if (HZ.busy === 0) render(); });
+setInterval(function () { if (HZ.busy === 0) render(); }, 60000);
+</script>
