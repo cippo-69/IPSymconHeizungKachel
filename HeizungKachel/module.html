@@ -30,10 +30,12 @@ button, select, input { font: inherit; color: var(--hz-fg); }
 /* Kopf: Soll links, Ist rechts (Vorgabe für alle Ansichten) */
 .head { display: flex; flex-direction: row-reverse; align-items: stretch; justify-content: space-between; gap: 12px; }
 .head.solo .ist { display: none; }
+.head.solo { justify-content: flex-end; }   /* row-reverse: flex-end = links */
+.head.solo .soll { align-items: flex-start; }
 /* nur Sollwert (kein Ist, kein Wochenplan): Bedienung mittig in der Kachel */
 body.solo #hz { justify-content: center; align-items: center; }
 body.solo .head { justify-content: center; }
-body.solo .soll { align-items: center; gap: 10px; }
+body.solo .head .soll { align-items: center; gap: 10px; }
 body.solo .soll .ctl { gap: 14px; }
 body.solo .soll .v { font-size: 34px; min-width: 96px; }
 body.solo .rb { width: 52px; height: 52px; font-size: 26px; }
