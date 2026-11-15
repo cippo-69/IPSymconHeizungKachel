@@ -1,16 +1,29 @@
 <style>
 :root {
-  --hz-accent: #E8590C;
-  --hz-bg: rgba(127,127,127,.07);
-  --hz-bg2: rgba(127,127,127,.13);
-  --hz-line: rgba(127,127,127,.2);
-  --hz-muted: rgba(127,127,127,1);
+  --hz-accent: #5ECAAB;    /* Akzentfarbe der Symcon-Kachel-Visu */
+  --hz-fg: #1F2124;
+  --hz-bg: rgba(0,0,0,.045);
+  --hz-bg2: rgba(0,0,0,.075);
+  --hz-line: rgba(0,0,0,.12);
+  --hz-muted: rgba(0,0,0,.52);
   --hz-top: 58px;          /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
+}
+/* Dark Mode: Bedienflächen deutlich heller als die Kachel */
+body.dark {
+  --hz-fg: #F2F3F5;
+  --hz-bg: rgba(255,255,255,.10);
+  --hz-bg2: rgba(255,255,255,.15);
+  --hz-line: rgba(255,255,255,.16);
+  --hz-muted: rgba(255,255,255,.6);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
-body { font-family: 'Poppins', 'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 14px; line-height: 1.35; color: inherit; }
-button, select, input { font: inherit; color: inherit; }
+body { font-family: 'Poppins', 'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 14px; line-height: 1.35; }
+button, select, input { font: inherit; color: var(--hz-fg); }
+#hz, #hz div, #hz span, #hz b { color: var(--hz-fg); }
+#hz .lbl, #hz .facts, #hz .facts span, #hz .tgl, #hz .hint, #hz .ticks span, #hz .scale span, #hz .wk .chev { color: var(--hz-muted); }
+#hz .wk.today .d { color: var(--hz-accent); }
+#hz .sp .badge { color: #fff; }
 #hz { position: absolute; inset: 0; padding: var(--hz-top) 16px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .lbl { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--hz-muted); }
 
@@ -150,9 +163,25 @@ function nextSwitch() {
   return null;
 }
 
+/*
+ * Hell/Dunkel erkennen: Die Kachel-Visu gibt die Textfarbe an die Seite weiter (helle Schrift = Dark Mode).
+ * Ohne Vorgabe entscheidet die Systemeinstellung.
+ */
+function theme() {
+  var b = document.body;
+  var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(b).color || ''), dark;
+  if (m && !(m[1] === '0' && m[2] === '0' && m[3] === '0')) {
+    dark = (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255 > 0.5;
+  } else {
+    dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  b.classList.toggle('dark', dark);
+}
+
 function render() {
   var s = HZ.s, el = document.getElementById('hz');
   if (!s) return;
+  theme();
   document.body.classList.toggle('compact', window.innerHeight < 300);
   var dg = digits(), h = '', cur = modeById(s.current);
 

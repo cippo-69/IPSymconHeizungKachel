@@ -34,7 +34,7 @@ class HeizungKachel extends IPSModuleStrict
         $this->RegisterPropertyFloat('MinTemp', 10.0);     // Bereich für Sollwert und Schieberegler
         $this->RegisterPropertyFloat('MaxTemp', 24.0);
         $this->RegisterPropertyBoolean('ApplyToCurrent', true);
-        $this->RegisterPropertyInteger('AccentColor', 0xE8590C);
+        $this->RegisterPropertyInteger('AccentColor', 0x5ECAAB); // Türkis der Symcon-Kachel-Visu
 
         $this->RegisterAttributeString('Watched', '[]');
 
