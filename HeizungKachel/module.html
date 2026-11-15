@@ -115,6 +115,17 @@ body.compact .card, body.compact .hint { display: none; }
 body.compact #hz { gap: 8px; }
 body.compact .ist .v { font-size: 34px; }
 body.compact .soll .v { min-width: 0; font-size: 22px; }
+/* kleine Kachel nur mit Sollwert: unter dem Titel mittig, ohne Beschriftung */
+body.solo.compact #hz { padding-top: 46px; padding-bottom: 8px; }
+body.solo.compact .soll .lbl { display: none; }
+body.solo.compact .soll .ctl { gap: 18px; }
+body.solo.compact .soll .v { font-size: 28px; min-width: 64px; }
+body.solo.compact .rb { width: 44px; height: 44px; font-size: 22px; }
+@media (max-height: 130px) {
+  body.solo.compact #hz { padding-top: 40px; padding-bottom: 4px; }
+  body.solo.compact .rb { width: 38px; height: 38px; font-size: 20px; }
+  body.solo.compact .soll .v { font-size: 24px; }
+}
 </style>
 <div id="hz"></div>
 <script>
