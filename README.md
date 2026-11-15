@@ -13,7 +13,7 @@ Wochenprogramm und einem Schieberegler je Betriebsart (z. B. Heizbetrieb und Abs
 - **Wochenprogramm** als Tagesbalken je Gruppe; Antippen öffnet die Schaltpunkte (Zeit, Betriebsart, löschen,
   hinzufügen). Wochenplan ein/aus.
 
-Wochenprogramm und Sollwerte klappen automatisch nach der Kachelhöhe auf (ab 480 px, z. B. in der Vergrößern-Ansicht) und lassen sich über das Regler-Symbol neben der Betriebsart auf- und zuklappen (wie Klang in der Sonos-Kachel). Auch bei kleiner Kachel bleibt das Symbol erreichbar; aufgeklappt scrollt der Inhalt in der Kachel.
+Wochenprogramm und Sollwerte klappen automatisch nach der Kachelhöhe auf (ab 480 px, z. B. in der Vergrößern-Ansicht) und lassen sich über das Regler-Symbol neben der Betriebsart auf- und zuklappen (wie Klang in der Sonos-Kachel). Der zuletzt gewählte Zustand wird im Modul gemerkt (gilt nach dem Neuladen und auf allen Geräten); bis dahin gilt die Automatik. Auch bei kleiner Kachel bleibt das Symbol erreichbar; aufgeklappt scrollt der Inhalt in der Kachel.
 
 ## Voraussetzungen
 

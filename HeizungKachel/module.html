@@ -153,6 +153,8 @@ var ICON = {
 
 function handleMessage(data) {
   try { HZ.s = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
+  // gemerkter Klappzustand vom Modul (gilt nach Neuladen und auf allen Geräten); null = automatisch nach Kachelhöhe
+  if (typeof HZ.s.expanded === 'boolean') { if (HZ.open !== HZ.s.expanded && !HZ.s.expanded) HZ.edit = null; HZ.open = HZ.s.expanded; }
   if (HZ.busy > 0) { HZ.pending = true; return; }
   render();
 }
@@ -314,6 +316,8 @@ function bind() {
   if (mo) mo.onclick = function () {
     HZ.open = !isOpen();
     if (!HZ.open) HZ.edit = null;
+    HZ.s.expanded = HZ.open;
+    send('SetExpanded', HZ.open);   // Zustand im Modul merken
     render();
     var c = HZ.open && document.querySelector('.card');
     if (c && c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
