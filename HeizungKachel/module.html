@@ -50,7 +50,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px;
 input[type=range]::-moz-range-track { height: 8px; border-radius: 4px; background: var(--hz-line); }
 input[type=range]::-moz-range-progress { height: 8px; border-radius: 4px; background: var(--c); }
 input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--c); }
-.scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--hz-muted); padding: 0 48px; margin-top: -6px; }
+.scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--hz-muted); padding: 0 52px; }
+.sub { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--hz-line); margin-top: 4px; padding-top: 12px; }
 
 /* Wochenprogramm */
 .wk { display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 10px; padding: 6px; margin: 0 -6px; touch-action: manipulation; }
@@ -178,23 +179,7 @@ function render() {
     h += '<div class="mode"><span class="dot" style="background:' + cur.color + '"></span><span>' + txt + '</span></div>';
   }
 
-  // Sollwerte je Betriebsart
-  h += '<div class="card"><div class="top"><span class="lbl">Sollwerte</span></div>';
-  (s.modes || []).forEach(function (m) {
-    if (m.v === null) return;
-    var p = (m.v - m.min) / (m.max - m.min) * 100;
-    h += '<div class="sp"><div class="t"><div class="n"><span class="dot" style="background:' + m.color + '"></span>' + esc(m.name)
-      + (m.id === s.current && s.active ? ' <span class="badge" style="background:' + m.color + '">aktiv</span>' : '') + '</div>'
-      + '<div class="val" id="mv' + m.id + '">' + fmt(m.v, dg) + ' °C</div></div>'
-      + '<div class="ctl"><button class="rb sm" data-ms="-1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' senken">−</button>'
-      + '<input type="range" data-m="' + m.id + '" min="' + m.min + '" max="' + m.max + '" step="' + s.step + '" value="' + m.v + '" style="--p:' + p + '%;--c:' + m.color + '" aria-label="' + esc(m.name) + '">'
-      + '<button class="rb sm" data-ms="1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' erhöhen">+</button></div></div>';
-  });
-  var m0 = (s.modes || []).filter(function (m) { return m.v !== null; })[0];
-  if (m0) h += '<div class="scale"><span>' + fmt(m0.min, 0) + '°</span><span>' + fmt(m0.max, 0) + '°</span></div>';
-  h += '</div>';
-
-  // Wochenprogramm
+  // Wochenprogramm mit Schaltpunkten, darunter die Sollwerte je Betriebsart
   var tb = 1 << dow(), nm2 = nowMin();
   h += '<div class="card"><div class="top"><span class="lbl">Wochenprogramm</span><span class="tgl">' + (s.active ? 'aktiv' : 'aus') + '<button class="tg' + (s.active ? ' on' : '') + '" id="act" aria-label="Wochenplan ein/aus"></button></span></div>';
   (s.groups || []).forEach(function (g) {
@@ -219,7 +204,22 @@ function render() {
       h += '<button class="btn" data-add="' + g.id + '">+ Schaltpunkt</button></div>';
     }
   });
-  h += '<div class="ticks"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div></div>';
+  h += '<div class="ticks"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>';
+
+  h += '<div class="sub"><div class="top"><span class="lbl">Sollwerte</span></div>';
+  (s.modes || []).forEach(function (m) {
+    if (m.v === null) return;
+    var p = (m.v - m.min) / (m.max - m.min) * 100;
+    h += '<div class="sp"><div class="t"><div class="n"><span class="dot" style="background:' + m.color + '"></span>' + esc(m.name)
+      + (m.id === s.current && s.active ? ' <span class="badge" style="background:' + m.color + '">aktiv</span>' : '') + '</div>'
+      + '<div class="val" id="mv' + m.id + '">' + fmt(m.v, dg) + ' °C</div></div>'
+      + '<div class="ctl"><button class="rb sm" data-ms="-1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' senken">−</button>'
+      + '<input type="range" data-m="' + m.id + '" min="' + m.min + '" max="' + m.max + '" step="' + s.step + '" value="' + m.v + '" style="--p:' + p + '%;--c:' + m.color + '" aria-label="' + esc(m.name) + '">'
+      + '<button class="rb sm" data-ms="1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' erhöhen">+</button></div></div>';
+  });
+  var m0 = (s.modes || []).filter(function (m) { return m.v !== null; })[0];
+  if (m0) h += '<div class="scale"><span>' + fmt(m0.min, 0) + '°</span><span>' + fmt(m0.max, 0) + '°</span></div>';
+  h += '</div></div>';
   h += '<div class="hint">Tageszeile antippen, um Schaltpunkte zu bearbeiten. Die Sollwertverstellung oben gilt bis zum nächsten Schaltpunkt.</div>';
 
   el.innerHTML = h;
