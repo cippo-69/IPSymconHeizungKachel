@@ -5,7 +5,7 @@ Wochenprogramm und einem Schieberegler je Betriebsart (z. B. Heizbetrieb und Abs
 
 ## Inhalt der Kachel
 
-- **Ist-Temperatur**, optional Luftfeuchte (auf die Ist-Temperatur umgerechnet) und Ventilposition
+- **Sollwert** links, **Ist-Temperatur** rechts; optional relative Luftfeuchte (auf die Ist-Temperatur umgerechnet) und Ventilposition
 - **Sollwert** mit − / +; die Verstellung gilt bis zum nächsten Schaltpunkt des Wochenplans
 - **Betriebsart** jetzt, mit nächstem Schaltpunkt
 - **Sollwerte** je Aktion des Wochenplans als Schieberegler. Ist die geänderte Betriebsart gerade aktiv, wird der

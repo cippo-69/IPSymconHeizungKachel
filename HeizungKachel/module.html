@@ -27,8 +27,8 @@ button, select, input { font: inherit; color: var(--hz-fg); }
 #hz { position: absolute; inset: 0; padding: var(--hz-top) 16px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .lbl { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--hz-muted); }
 
-/* Kopf: Ist und Soll */
-.head { display: flex; align-items: stretch; justify-content: space-between; gap: 12px; }
+/* Kopf: Soll links, Ist rechts (Vorgabe für alle Ansichten) */
+.head { display: flex; flex-direction: row-reverse; align-items: stretch; justify-content: space-between; gap: 12px; }
 .head.solo .ist { display: none; }
 /* nur Sollwert (kein Ist, kein Wochenplan): Bedienung mittig in der Kachel */
 body.solo #hz { justify-content: center; align-items: center; }
@@ -37,13 +37,13 @@ body.solo .soll { align-items: center; gap: 10px; }
 body.solo .soll .ctl { gap: 14px; }
 body.solo .soll .v { font-size: 34px; min-width: 96px; }
 body.solo .rb { width: 52px; height: 52px; font-size: 26px; }
-.ist { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ist { display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 4px; min-width: 0; }
 .ist .v { font-size: 44px; font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
 .ist .v small { font-size: 18px; font-weight: 400; margin-left: 2px; color: var(--hz-muted); }
-.facts { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--hz-muted); }
+.facts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; font-size: 12px; color: var(--hz-muted); }
 .facts span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .facts svg { width: 13px; height: 13px; flex: none; }
-.soll { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 6px; }
+.soll { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 6px; }
 .soll .ctl { display: flex; align-items: center; gap: 4px; }
 .soll .v { font-size: 26px; font-weight: 500; min-width: 76px; text-align: center; font-variant-numeric: tabular-nums; }
 .rb { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--hz-bg2); font-size: 22px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none; transition: background .15s, transform .1s; touch-action: manipulation; user-select: none; }
@@ -209,8 +209,8 @@ function render() {
   // Kopf
   h += '<div class="head' + (s.hasActual || s.humidity || s.valve !== null ? '' : ' solo') + '"><div class="ist">' + (s.hasActual ? '<div class="lbl">Ist</div><div class="v">' + fmt(s.actual, 1) + '<small>°C</small></div>' : '') + '<div class="facts">';
   if (s.humidity) {
-    var hu = s.humidity, tip = 'Sensor ' + fmt(hu.raw, 0) + ' %' + (hu.ts !== null ? ' bei ' + fmt(hu.ts, 1) + ' °C' : '') + (hu.ah !== null ? ', absolut ' + fmt(hu.ah, 1) + ' g/m³' : '');
-    h += '<span title="' + esc(tip) + '">' + ICON.drop + fmt(hu.rh, 0) + ' %' + (hu.ah !== null ? ' · ' + fmt(hu.ah, 1) + ' g/m³' : '') + '</span>';
+    var hu = s.humidity, tip = 'Sensor ' + fmt(hu.raw, 0) + ' %' + (hu.ts !== null ? ' bei ' + fmt(hu.ts, 1) + ' °C' : '');
+    h += '<span title="' + esc(tip) + '">' + ICON.drop + fmt(hu.rh, 0) + ' %</span>';
   }
   if (s.valve !== null) h += '<span>' + ICON.valve + 'Ventil ' + fmt(s.valve, 0) + ' %</span>';
   h += '</div></div>';
