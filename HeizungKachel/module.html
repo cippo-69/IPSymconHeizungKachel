@@ -124,6 +124,15 @@ body.compact .hint { display: none; }   /* Wochenprogramm bleibt über das Regle
 body.compact #hz { gap: 8px; }
 body.compact .ist .v { font-size: 34px; }
 body.compact .soll .v { min-width: 0; font-size: 22px; }
+/* zugeklappte Kachel mit genug Höhe (z. B. iPhone 2×2): Inhalt mittig im freien Raum, größere Werte und Tasten */
+body.closed #hz { justify-content: center; gap: 18px; padding-bottom: 20px; }
+body.closed .ist .v { font-size: 48px; }
+body.closed .ist .v small { font-size: 20px; }
+body.closed .facts { font-size: 13px; }
+body.closed .soll .v { font-size: 30px; min-width: 66px; }
+body.closed .rb { width: 50px; height: 50px; font-size: 24px; }
+body.closed .mode { font-size: 14px; padding: 9px 14px; }
+body.closed .ib { width: 46px; height: 46px; }
 /* kleine Kachel nur mit Sollwert: unter dem Titel mittig, ohne Beschriftung */
 body.solo.compact #hz { padding-top: 46px; padding-bottom: 8px; }
 body.solo.compact .soll .lbl { display: none; }
@@ -326,6 +335,8 @@ function showMode(id, v) {
 
 function bind() {
   var s = HZ.s;
+  // zugeklappt (kein Wochenprogramm-Kasten), nicht nur Sollwert, genug Höhe: großzügigere Anordnung
+  document.body.classList.toggle('closed', !document.querySelector('.card') && !document.body.classList.contains('solo') && !s.error && window.innerHeight >= 230);
   var bk = document.getElementById('back');
   if (bk) bk.onclick = function () { try { openObject(s.backId); } catch (e) { /* nichts */ } };
   var mo = document.getElementById('more');
