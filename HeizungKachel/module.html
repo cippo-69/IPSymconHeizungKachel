@@ -29,9 +29,14 @@ button, select, input { font: inherit; color: var(--hz-fg); }
 
 /* Kopf: Ist und Soll */
 .head { display: flex; align-items: stretch; justify-content: space-between; gap: 12px; }
-.head.solo { justify-content: flex-start; }
 .head.solo .ist { display: none; }
-.head.solo .soll { align-items: flex-start; }
+/* nur Sollwert (kein Ist, kein Wochenplan): Bedienung mittig in der Kachel */
+body.solo #hz { justify-content: center; align-items: center; }
+body.solo .head { justify-content: center; }
+body.solo .soll { align-items: center; gap: 10px; }
+body.solo .soll .ctl { gap: 14px; }
+body.solo .soll .v { font-size: 34px; min-width: 96px; }
+body.solo .rb { width: 52px; height: 52px; font-size: 26px; }
 .ist { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .ist .v { font-size: 44px; font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
 .ist .v small { font-size: 18px; font-weight: 400; margin-left: 2px; color: var(--hz-muted); }
@@ -188,6 +193,7 @@ function render() {
   theme();
   document.body.classList.toggle('compact', window.innerHeight < 300);
   var dg = digits(), h = '', cur = modeById(s.current);
+  document.body.classList.toggle('solo', !s.hasActual && !s.humidity && s.valve === null && !(s.modes || []).length && !(s.groups || []).length && !s.error);
 
   // Kopf
   h += '<div class="head' + (s.hasActual || s.humidity || s.valve !== null ? '' : ' solo') + '"><div class="ist">' + (s.hasActual ? '<div class="lbl">Ist</div><div class="v">' + fmt(s.actual, 1) + '<small>°C</small></div>' : '') + '<div class="facts">';
