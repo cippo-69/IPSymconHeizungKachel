@@ -52,6 +52,13 @@ body.solo .rb { width: 52px; height: 52px; font-size: 26px; }
 .rb:hover { background: var(--hz-line); }
 .rb:active { transform: scale(.92); }
 .rb.sm { width: 38px; height: 38px; font-size: 19px; }
+.mrow { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+.mrow .mode { min-width: 0; }
+.ib { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--hz-bg2); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none; margin-left: auto; touch-action: manipulation; transition: background .15s; }
+#hz .ib, #hz .ib svg { color: var(--hz-muted); }
+.ib svg { width: 20px; height: 20px; }
+.ib.on { background: var(--hz-accent); }
+#hz .ib.on, #hz .ib.on svg { color: #fff; }
 .mode { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--hz-bg2); align-self: flex-start; max-width: 100%; }
 .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 
@@ -113,7 +120,7 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 
   .ticks { margin-left: 74px; }
 }
 /* kleine Kachel: nur Ist, Soll und Betriebsart */
-body.compact .card, body.compact .hint { display: none; }
+body.compact .card, body.compact .hint, body.compact .ib { display: none; }
 body.compact #hz { gap: 8px; }
 body.compact .ist .v { font-size: 34px; }
 body.compact .soll .v { min-width: 0; font-size: 22px; }
@@ -131,11 +138,12 @@ body.solo.compact .rb { width: 44px; height: 44px; font-size: 22px; }
 </style>
 <div id="hz"></div>
 <script>
-var HZ = { s: null, busy: 0, pending: false, edit: null };
+var HZ = { s: null, busy: 0, pending: false, edit: null, open: false };   // open: Wochenprogramm aufgeklappt
 var DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 var ICON = {
   drop: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.7c-.3 0-.6.1-.8.4C9 6 5 11.2 5 14.9 5 18.8 8.1 22 12 22s7-3.2 7-7.1c0-3.7-4-8.9-6.2-11.8-.2-.3-.5-.4-.8-.4z"/></svg>',
   valve: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h16M12 4v8M8 4h8M6 12v6h12v-6"/></svg>',
+  tune: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>',
   chev: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>'
 };
 
@@ -224,15 +232,20 @@ function render() {
 
   if (s.error) { el.innerHTML = h + '<div class="hint">' + esc(s.error) + '</div>'; bind(); return; }
 
+  var hasPlan = (s.modes || []).length || (s.groups || []).length;
+  h += '<div class="mrow">';
   if (cur) {
     var nx = s.active ? nextSwitch() : null, txt = esc(cur.name);
     if (!s.active) txt += ' · Wochenplan aus';
     else if (nx) { var nm = modeById(nx.a); txt += ' bis ' + (nx.k === 1 ? 'morgen ' : nx.k > 1 ? DAYS[(dow() + nx.k) % 7] + ' ' : '') + hm(nx.t) + (nm ? ', dann ' + esc(nm.name) : ''); }
     h += '<div class="mode"><span class="dot" style="background:' + cur.color + '"></span><span>' + txt + '</span></div>';
   }
+  // Wochenprogramm wird nur zum Einstellen gebraucht: über das Regler-Symbol aufklappen (wie Klang in der Sonos-Kachel)
+  if (hasPlan) h += '<button class="ib' + (HZ.open ? ' on' : '') + '" id="more" aria-expanded="' + HZ.open + '" title="Wochenprogramm und Sollwerte">' + ICON.tune + '</button>';
+  h += '</div>';
 
-  // ohne Wochenplan nur Ist und Soll
-  if (!(s.modes || []).length && !(s.groups || []).length) { el.innerHTML = h; bind(); return; }
+  // ohne Wochenplan oder zugeklappt nur Ist, Soll und Betriebsart
+  if (!hasPlan || !HZ.open) { el.innerHTML = h; bind(); return; }
 
   // Wochenprogramm mit Schaltpunkten, darunter die Sollwerte je Betriebsart
   var tb = 1 << dow(), nm2 = nowMin();
@@ -293,6 +306,14 @@ function showMode(id, v) {
 
 function bind() {
   var s = HZ.s;
+  var mo = document.getElementById('more');
+  if (mo) mo.onclick = function () {
+    HZ.open = !HZ.open;
+    if (!HZ.open) HZ.edit = null;
+    render();
+    var c = HZ.open && document.querySelector('.card');
+    if (c && c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
   document.querySelectorAll('.rb[data-t]').forEach(function (b) {
     b.onclick = function () {
       var v = snap(s.target.v + Number(b.dataset.t) * s.step, s.target);

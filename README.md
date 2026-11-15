@@ -13,7 +13,7 @@ Wochenprogramm und einem Schieberegler je Betriebsart (z. B. Heizbetrieb und Abs
 - **Wochenprogramm** als Tagesbalken je Gruppe; Antippen öffnet die Schaltpunkte (Zeit, Betriebsart, löschen,
   hinzufügen). Wochenplan ein/aus.
 
-Bei kleiner Kachel werden nur Ist, Soll und Betriebsart gezeigt.
+Wochenprogramm und Sollwerte sind zugeklappt und öffnen sich über das Regler-Symbol neben der Betriebsart (wie Klang in der Sonos-Kachel). Bei kleiner Kachel werden nur Ist, Soll und Betriebsart gezeigt.
 
 ## Voraussetzungen
 
