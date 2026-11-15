@@ -138,7 +138,11 @@ body.solo.compact .rb { width: 44px; height: 44px; font-size: 22px; }
 </style>
 <div id="hz"></div>
 <script>
-var HZ = { s: null, busy: 0, pending: false, edit: null, open: false };   // open: Wochenprogramm aufgeklappt
+// open: Wochenprogramm aufgeklappt; null = automatisch nach Kachelhöhe (große Kachel / Vergrößern-Ansicht offen)
+var HZ = { s: null, busy: 0, pending: false, edit: null, open: null };
+var AUTO_OPEN_H = 480;
+function isOpen() { return HZ.open === null ? window.innerHeight >= AUTO_OPEN_H : HZ.open; }
+window.addEventListener('resize', function () { if (HZ.s && HZ.busy === 0) render(); });
 var DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 var ICON = {
   drop: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.7c-.3 0-.6.1-.8.4C9 6 5 11.2 5 14.9 5 18.8 8.1 22 12 22s7-3.2 7-7.1c0-3.7-4-8.9-6.2-11.8-.2-.3-.5-.4-.8-.4z"/></svg>',
@@ -241,11 +245,11 @@ function render() {
     h += '<div class="mode"><span class="dot" style="background:' + cur.color + '"></span><span>' + txt + '</span></div>';
   }
   // Wochenprogramm wird nur zum Einstellen gebraucht: über das Regler-Symbol aufklappen (wie Klang in der Sonos-Kachel)
-  if (hasPlan) h += '<button class="ib' + (HZ.open ? ' on' : '') + '" id="more" aria-expanded="' + HZ.open + '" title="Wochenprogramm und Sollwerte">' + ICON.tune + '</button>';
+  if (hasPlan) h += '<button class="ib' + (isOpen() ? ' on' : '') + '" id="more" aria-expanded="' + isOpen() + '" title="Wochenprogramm und Sollwerte">' + ICON.tune + '</button>';
   h += '</div>';
 
   // ohne Wochenplan oder zugeklappt nur Ist, Soll und Betriebsart
-  if (!hasPlan || !HZ.open) { el.innerHTML = h; bind(); return; }
+  if (!hasPlan || !isOpen()) { el.innerHTML = h; bind(); return; }
 
   // Wochenprogramm mit Schaltpunkten, darunter die Sollwerte je Betriebsart
   var tb = 1 << dow(), nm2 = nowMin();
@@ -308,7 +312,7 @@ function bind() {
   var s = HZ.s;
   var mo = document.getElementById('more');
   if (mo) mo.onclick = function () {
-    HZ.open = !HZ.open;
+    HZ.open = !isOpen();
     if (!HZ.open) HZ.edit = null;
     render();
     var c = HZ.open && document.querySelector('.card');
