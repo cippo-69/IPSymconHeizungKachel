@@ -176,6 +176,33 @@ function handleMessage(data) {
   if (typeof HZ.s.expanded === 'boolean') { if (HZ.open !== HZ.s.expanded && !HZ.s.expanded) HZ.edit = null; HZ.open = HZ.s.expanded; }
   if (HZ.busy > 0) { HZ.pending = true; return; }
   render();
+  if (!HZ.reported) { HZ.reported = true; requestAnimationFrame(function () { requestAnimationFrame(reportTiming); }); }
+}
+
+/*
+ * Diagnose Ladezeit: misst in der Kachel (Serverantwort, erste Darstellung) und, wenn die Visu erreichbar ist,
+ * die Zeit vom letzten Tippen in der Visu bis zum Anlegen dieser Kachel. Ergebnis geht an das Modul (HZK_GetTimings).
+ */
+var PAR = null;
+try { if (window.parent && window.parent !== window && window.parent.performance) PAR = window.parent; } catch (e) { PAR = null; }
+try {
+  // Tipp-Zeitpunkt in der Visu merken; die Funktion entsteht im Kontext der Visu und bleibt nach dem Entfernen der Kachel erhalten
+  if (PAR && !PAR.__hzTap) { PAR.__hzTap = 1; PAR.Function('var f=function(){window.__hzT=performance.now()};document.addEventListener("pointerup",f,true);document.addEventListener("touchend",f,true);')(); }
+} catch (e) { /* Visu nicht erreichbar */ }
+function reportTiming() {
+  try {
+    var P = performance, nav = P.getEntriesByType('navigation')[0] || P.timing || {}, fp = (P.getEntriesByType('paint')[0] || {}).startTime;
+    var ua = navigator.userAgent, r = {
+      dev: /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : 'PC',
+      resp: Math.round(nav.responseEnd || 0), dom: Math.round(nav.domContentLoadedEventEnd || 0),
+      fp: fp != null ? Math.round(fp) : null, shown: Math.round(P.now()), h: window.innerHeight
+    };
+    if (PAR && PAR.__hzT != null && P.timeOrigin) {
+      var tap = Math.round(P.timeOrigin - PAR.performance.timeOrigin - PAR.__hzT);
+      if (tap >= 0 && tap < 10000) { r.tapToFrame = tap; r.total = tap + r.shown; }
+    }
+    send('Timing', JSON.stringify(r));
+  } catch (e) { /* Diagnose darf nie stören */ }
 }
 
 function fmt(v, d) {

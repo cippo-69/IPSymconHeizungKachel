@@ -39,6 +39,7 @@ class HeizungKachel extends IPSModuleStrict
         $this->RegisterPropertyBoolean('AlwaysOpen', false); // Wochenprogramm und Sollwerte immer zeigen (Instanz auf der Einstellungsseite)
 
         $this->RegisterAttributeString('Watched', '[]');
+        $this->RegisterAttributeString('Timings', '[]'); // Diagnose: Ladezeiten der Kachel
         $this->RegisterAttributeInteger('Expanded', -1); // Wochenprogramm: -1 automatisch nach Kachelhöhe, 0 zu, 1 auf (gemerkt)
 
         $this->SetVisualizationType(1);
@@ -111,9 +112,23 @@ class HeizungKachel extends IPSModuleStrict
         return file_get_contents(__DIR__ . '/module.html') . '<style>:root{--hz-accent:' . $accent . ';}</style>' . $initial;
     }
 
+    /** Diagnose: zuletzt gemeldete Ladezeiten der Kachel (neueste zuerst, max. 20) */
+    public function GetTimings(): string
+    {
+        return $this->ReadAttributeString('Timings');
+    }
+
     public function RequestAction(string $Ident, mixed $Value): void
     {
         $p = is_string($Value) ? json_decode($Value, true) : null;
+        if ($Ident === 'Timing') {          // Ladezeit-Meldung der Kachel, nur speichern
+            if (is_array($p)) {
+                $list = json_decode($this->ReadAttributeString('Timings'), true) ?: [];
+                array_unshift($list, ['t' => date('Y-m-d H:i:s')] + array_slice($p, 0, 12, true));
+                $this->WriteAttributeString('Timings', json_encode(array_slice($list, 0, 20)));
+            }
+            return;
+        }
         switch ($Ident) {
             case 'SetTarget':
                 $this->SetTarget((float) $Value);
