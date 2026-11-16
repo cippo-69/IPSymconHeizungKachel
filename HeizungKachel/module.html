@@ -197,6 +197,17 @@ function reportTiming() {
       resp: Math.round(nav.responseEnd || 0), dom: Math.round(nav.domContentLoadedEventEnd || 0),
       fp: fp != null ? Math.round(fp) : null, shown: Math.round(P.now()), h: window.innerHeight
     };
+    // Verbindungsweg (nur Art, keine Adresse) und Phasen der Anfrage: Verbindungsaufbau, TLS, Warten auf die Antwort
+    var hn = location.hostname;
+    r.via = /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|127\.|localhost$)/.test(hn) ? 'LAN' : (/ipmagic|symcon/.test(hn) ? 'Connect' : 'anderer Host');
+    r.https = location.protocol === 'https:';
+    if (nav.requestStart) {
+      r.conn = Math.round((nav.connectEnd || 0) - (nav.domainLookupStart || 0));
+      r.tls = nav.secureConnectionStart > 0 ? Math.round(nav.connectEnd - nav.secureConnectionStart) : 0;
+      r.wait = Math.round(nav.responseStart - nav.requestStart);
+      r.dl = Math.round(nav.responseEnd - nav.responseStart);
+      r.start = Math.round(nav.fetchStart || 0);
+    }
     if (PAR && PAR.__hzT != null && P.timeOrigin) {
       var tap = Math.round(P.timeOrigin - PAR.performance.timeOrigin - PAR.__hzT);
       if (tap >= 0 && tap < 10000) { r.tapToFrame = tap; r.total = tap + r.shown; }
