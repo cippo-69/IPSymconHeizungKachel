@@ -107,52 +107,89 @@ class HeizungsanlageKachel extends IPSModuleStrict
     /** Verlauf 24 h, Gas heute und Warmwasserladungen aus dem Archiv (Timer alle 5 min) */
     public function Refresh(): void
     {
-        $h = ['t' => time(), 'series' => [], 'gas' => null, 'charges' => null, 'chargeTimes' => []];
-        $ac = $this->Archive();
         $to = time();
         $from = $to - 86400;
+        $h = ['t' => $to, 'series' => $this->Series($from, $to), 'gas' => null, 'charges' => null, 'chargeTimes' => []];
+        $ac = $this->Archive();
         if ($ac > 0) {
-            foreach (['FlowID' => 'vl', 'ReturnID' => 'rl', 'DhwID' => 'ww'] as $p => $k) {
-                $vid = $this->ReadPropertyInteger($p);
-                if ($vid <= 0 || !@IPS_VariableExists($vid) || !AC_GetLoggingStatus($ac, $vid)) {
-                    continue;
-                }
-                $pts = [];
-                foreach (array_reverse((array) @AC_GetAggregatedValues($ac, $vid, 5, $from, $to, 0)) as $r) {
-                    $pts[] = [(int) $r['TimeStamp'], round((float) $r['Avg'], 1)];
-                }
-                $h['series'][$k] = $pts;
-            }
             $gid = $this->ReadPropertyInteger('GasID');
             if ($gid > 0 && @IPS_VariableExists($gid) && AC_GetLoggingStatus($ac, $gid)) {
                 $d = (array) @AC_GetAggregatedValues($ac, $gid, 1, strtotime('today'), $to, 1);
                 $h['gas'] = isset($d[0]) ? round((float) $d[0]['Avg'], 2) : 0.0;
             }
-            $cid = $this->ReadPropertyInteger('ChargeID');
-            $thr = $this->ReadPropertyFloat('ChargeThreshold');
-            if ($cid > 0 && $thr > 0 && @IPS_VariableExists($cid) && AC_GetLoggingStatus($ac, $cid)) {
-                $vals = array_reverse((array) @AC_GetLoggedValues($ac, $cid, $from - 3600, $to, 0));
-                $above = false;
-                $first = true;
+            $ct = $this->ChargeTimes($from, $to);
+            if ($ct !== null) {
+                $h['chargeTimes'] = $ct;
                 $today = strtotime('today');
-                $n = 0;
-                foreach ($vals as $r) {
-                    $on = (float) $r['Value'] >= $thr;
-                    $ts = (int) $r['TimeStamp'];
-                    if ($on && !$above && !$first && $ts >= $from) {
-                        $h['chargeTimes'][] = $ts;
-                        if ($ts >= $today) {
-                            $n++;
-                        }
-                    }
-                    $above = $on;
-                    $first = false;
-                }
-                $h['charges'] = $n;
+                $h['charges'] = count(array_filter($ct, fn ($t) => $t >= $today));
             }
         }
         $this->WriteAttributeString('Hist', json_encode($h));
         $this->Push();
+    }
+
+    /**
+     * Ausschnitt des Verlaufs für ein Endgerät (Verschieben, Zeitraum). Die Antwort geht wie jeder Zustand an alle
+     * offenen Kacheln; nur die Kachel mit der passenden Anfrage-ID übernimmt sie.
+     */
+    private function History(string $id, int $from, int $to): void
+    {
+        $to = min($to, time());
+        $from = max($from, $to - 31 * 86400);
+        if ($to - $from < 3600) {
+            $from = $to - 3600;
+        }
+        $this->UpdateVisualizationValue(json_encode([
+            'type' => 'hist', 'id' => $id, 'from' => $from, 'to' => $to,
+            'series' => $this->Series($from, $to), 'chargeTimes' => $this->ChargeTimes($from, $to) ?? []
+        ]));
+    }
+
+    /** Vorlauf, Rücklauf, Warmwasser: bis 3 Tage 5-Minuten-Mittel, darüber Stundenmittel */
+    private function Series(int $from, int $to): array
+    {
+        $ac = $this->Archive();
+        $r = [];
+        if ($ac <= 0) {
+            return $r;
+        }
+        $level = ($to - $from) > 3 * 86400 ? 0 : 5;
+        foreach (['FlowID' => 'vl', 'ReturnID' => 'rl', 'DhwID' => 'ww'] as $p => $k) {
+            $vid = $this->ReadPropertyInteger($p);
+            if ($vid <= 0 || !@IPS_VariableExists($vid) || !AC_GetLoggingStatus($ac, $vid)) {
+                continue;
+            }
+            $pts = [];
+            foreach (array_reverse((array) @AC_GetAggregatedValues($ac, $vid, $level, $from, $to, 0)) as $v) {
+                $pts[] = [(int) $v['TimeStamp'], round((float) $v['Avg'], 1)];
+            }
+            $r[$k] = $pts;
+        }
+        return $r;
+    }
+
+    /** Beginn der Warmwasserladungen (Kesselleistung steigt über die Schwelle); null = keine Erkennung eingerichtet */
+    private function ChargeTimes(int $from, int $to): ?array
+    {
+        $ac = $this->Archive();
+        $cid = $this->ReadPropertyInteger('ChargeID');
+        $thr = $this->ReadPropertyFloat('ChargeThreshold');
+        if ($ac <= 0 || $cid <= 0 || $thr <= 0 || !@IPS_VariableExists($cid) || !AC_GetLoggingStatus($ac, $cid)) {
+            return null;
+        }
+        $r = [];
+        $above = false;
+        $first = true;
+        foreach (array_reverse((array) @AC_GetLoggedValues($ac, $cid, $from - 3600, $to, 0)) as $v) {
+            $on = (float) $v['Value'] >= $thr;
+            $ts = (int) $v['TimeStamp'];
+            if ($on && !$above && !$first && $ts >= $from) {
+                $r[] = $ts;
+            }
+            $above = $on;
+            $first = false;
+        }
+        return $r;
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -166,6 +203,12 @@ class HeizungsanlageKachel extends IPSModuleStrict
                 break;
             case 'Refresh':
                 $this->Refresh();
+                return;
+            case 'History':
+                $p = is_string($Value) ? json_decode($Value, true) : null;
+                if (is_array($p)) {
+                    $this->History(substr((string) ($p['id'] ?? ''), 0, 16), (int) ($p['from'] ?? 0), (int) ($p['to'] ?? 0));
+                }
                 return;
             default:
                 throw new Exception('Unbekannte Aktion: ' . $Ident);

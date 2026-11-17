@@ -56,7 +56,11 @@ Zweites Modul der Bibliothek: eine Kachel je Wärmeerzeuger (Kessel, später Wä
 - **Betriebszustand** als Plakette: Meldung aktiv → Warmwasserladung (Kesselleistung über Schwelle) → Brenner (Leistung > 0) → Statustext → Pumpe → Bereit
 - **Außentemperatur**, **Vorlauf** (mit Soll), **Rücklauf** (mit Spreizung), **Warmwasser** (mit Soll)
 - **Meldungen**: aktive Alarmvariablen rot, mit Beginn
-- **Verlauf 24 h**: Vorlauf, Rücklauf und Warmwasser aus dem Archiv (5-Minuten-Mittel), erkannte Warmwasserladungen als Balken; Gasverbrauch heute (m³ und kWh) und Zahl der Warmwasserladungen heute. Aktualisierung alle 5 Minuten.
+- **Verlauf**: Vorlauf, Rücklauf und Warmwasser aus dem Archiv, erkannte Warmwasserladungen als Balken, Tageswechsel gestrichelt; Gasverbrauch heute (m³ und kWh) und Zahl der Warmwasserladungen heute.
+  - Zeitraum 6 h, 24 h, 3 Tage oder 7 Tage (bis 3 Tage 5-Minuten-Mittel, darüber Stundenmittel)
+  - verschieben per Wischen/Ziehen im Diagramm oder mit ‹ ›; „Jetzt“ springt zurück auf live (Aktualisierung alle 5 Minuten)
+  - Achse und Zeitraum mit Wochentag, Datum und Uhrzeit; Antippen bzw. Mauszeiger zeigt die Werte zum Zeitpunkt
+  - jede Kachel lädt ihren Ausschnitt selbst (Anfrage-ID), Verschieben auf einem Gerät ändert die Ansicht auf anderen Geräten nicht
 - **Schalten**: frei konfigurierbar
   - *Umschalten*: Boolean-Variable (RequestAction) oder Ereignis aktiv/inaktiv (zweites Ereignis wird mitgeschaltet)
   - *Taste*: setzt einen Wert per RequestAction; Tasten mit gleicher Gruppe stehen als Umschalter in einer Zeile, die Status-Variable markiert die aktive Taste
