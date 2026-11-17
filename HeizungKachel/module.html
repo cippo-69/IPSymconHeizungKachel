@@ -176,8 +176,17 @@ var ICON = {
   chev: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>'
 };
 
+/* Farben aus „Visu Design“ live übernehmen (Element #w5d), auch wenn die Visu die Kachel zwischengespeichert hat */
+function design(css) {
+  if (typeof css !== 'string') return;
+  var st = document.getElementById('w5d');
+  if (!st) { st = document.createElement('style'); st.id = 'w5d'; (document.head || document.body).appendChild(st); }
+  if (st.textContent !== css) st.textContent = css;
+}
+
 function handleMessage(data) {
   try { HZ.s = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
+  design(HZ.s.design);
   // gemerkter Klappzustand vom Modul (gilt nach Neuladen und auf allen Geräten); null = automatisch nach Kachelhöhe
   if (typeof HZ.s.expanded === 'boolean') { if (HZ.open !== HZ.s.expanded && !HZ.s.expanded) HZ.edit = null; HZ.open = HZ.s.expanded; }
   if (HZ.busy > 0) { HZ.pending = true; return; }

@@ -80,6 +80,12 @@ class HeizungKachel extends IPSModuleStrict
                 $watch[] = [$vid, VM_UPDATE];
             }
         }
+        // Theme-Wechsel in „Visu Design“: Zustand mit neuem Design-CSS senden (MessageSink → Push)
+        $design = $this->DesignID();
+        if ($design > 0) {
+            $this->RegisterMessage($design, IM_CHANGESETTINGS);
+            $watch[] = [$design, IM_CHANGESETTINGS];
+        }
         $this->WriteAttributeString('Watched', json_encode($watch));
 
         if (!$ok) {
@@ -108,19 +114,31 @@ class HeizungKachel extends IPSModuleStrict
         return $this->DesignStyle() . file_get_contents(__DIR__ . '/module.html') . $initial;
     }
 
-    /** Farben aus dem Modul „Visu Design“ (W5D); ohne Instanz gelten die Vorgaben im module.html. */
+    /**
+     * Farben aus dem Modul „Visu Design“ (W5D); ohne Instanz gelten die Vorgaben im module.html.
+     * Das CSS steht im Element #w5d und kommt zusätzlich mit jedem Zustand mit (Feld design), damit ein
+     * Theme-Wechsel auch in zwischengespeicherten Kacheln ohne Neuladen ankommt.
+     */
     private function DesignStyle(): string
     {
+        return '<style id="w5d">' . $this->DesignCSS() . '</style>';
+    }
+
+    private function DesignID(): int
+    {
         $guid = '{018EEC85-8FFC-4E1F-A966-702C4BBDC2E8}';
-        if (!IPS_ModuleExists($guid) || !function_exists('W5D_GetCSS')) {
-            return '';
+        if (!IPS_ModuleExists($guid)) {
+            return 0;
         }
         $ids = IPS_GetInstanceListByModuleID($guid);
-        if (count($ids) === 0) {
-            return '';
-        }
         sort($ids);
-        return '<style>' . W5D_GetCSS($ids[0]) . '</style>';
+        return $ids[0] ?? 0;
+    }
+
+    private function DesignCSS(): string
+    {
+        $id = $this->DesignID();
+        return $id > 0 && function_exists('W5D_GetCSS') ? W5D_GetCSS($id) : '';
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
@@ -238,7 +256,7 @@ class HeizungKachel extends IPSModuleStrict
     private function BuildState(): array
     {
         $step = max(0.1, $this->ReadPropertyFloat('StepSize'));
-        $state = ['step' => $step, 'hasActual' => $this->ReadPropertyInteger('ActualID') > 0, 'actual' => null, 'humidity' => null, 'target' => null, 'valve' => null, 'modes' => [], 'groups' => [], 'active' => false, 'current' => 0, 'error' => ''];
+        $state = ['design' => $this->DesignCSS(), 'step' => $step, 'hasActual' => $this->ReadPropertyInteger('ActualID') > 0, 'actual' => null, 'humidity' => null, 'target' => null, 'valve' => null, 'modes' => [], 'groups' => [], 'active' => false, 'current' => 0, 'error' => ''];
         $ex = $this->ReadAttributeInteger('Expanded');
         $state['expanded'] = $ex < 0 ? null : $ex === 1;
         // Regler-Symbol öffnet per openObject das Visu-Fenster des Sollwerts (Regler je Betriebsart + Wochenplan als Unterobjekte)

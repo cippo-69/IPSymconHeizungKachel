@@ -43,7 +43,7 @@ Kleine Kachel: Sollwert, Ist und Betriebsart. Ist eine Einstellungsseite (Eigens
 
 ## Farben
 
-Die Kachel hat keine eigenen Farbeinstellungen. Akzent, Text und Schrift auf Akzentflächen kommen aus dem Modul [Visu Design](https://github.com/cippo-69/IPSymconVisuDesign) (CSS-Variablen `--w5-*`, hell und Dark Mode). Ohne Design-Instanz gilt das Farbkonzept W5x (Tannengrün). Die Farben der Betriebsarten stammen aus den Aktionen des Wochenplans.
+Die Kachel hat keine eigenen Farbeinstellungen. Akzent, Text und Schrift auf Akzentflächen kommen aus dem Modul [Visu Design](https://github.com/cippo-69/IPSymconVisuDesign) (CSS-Variablen `--w5-*`, hell und Dark Mode). Ohne Design-Instanz gilt das Farbkonzept W5x (Tannengrün). Ein Theme-Wechsel kommt ohne Neuladen an: Die Kachel abonniert die Einstellungen der Design-Instanz und schickt das Design-CSS mit jedem Zustand mit (auch an zwischengespeicherte Kacheln). Die Farben der Betriebsarten stammen aus den Aktionen des Wochenplans.
 
 ## Lizenz
 
