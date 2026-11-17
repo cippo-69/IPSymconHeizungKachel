@@ -40,8 +40,10 @@ Kleine Kachel: Sollwert, Ist und Betriebsart. Ist eine Einstellungsseite (Eigens
 | Schrittweite | Raster für Sollwert und Schieberegler (Standard 1 K) |
 | Minimum / Maximum | Bereich für Sollwert und Schieberegler (Standard 10–24 °C) |
 | Laufende Betriebsart übernehmen | Änderung am Regler der aktiven Betriebsart sofort als Sollwert setzen |
-| Akzentfarbe (heller Modus) | Farbe für Schalter, heutigen Tag und aktives Regler-Symbol |
-| Akzentfarbe Dark Mode | eigene Farbe im Dark Mode der Visu; transparent = wie im hellen Modus |
+
+## Farben
+
+Die Kachel hat keine eigenen Farbeinstellungen. Akzent, Text und Schrift auf Akzentflächen kommen aus dem Modul [Visu Design](https://github.com/cippo-69/IPSymconVisuDesign) (CSS-Variablen `--w5-*`, hell und Dark Mode). Ohne Design-Instanz gilt das Farbkonzept W5x (Tannengrün). Die Farben der Betriebsarten stammen aus den Aktionen des Wochenplans.
 
 ## Lizenz
 

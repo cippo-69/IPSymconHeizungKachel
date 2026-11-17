@@ -13,10 +13,7 @@
             { "type": "NumberSpinner", "name": "MaxTemp", "caption": "Maximum", "digits": 1, "suffix": " °C" }
         ] },
         { "type": "CheckBox", "name": "ApplyToCurrent", "caption": "Änderung der laufenden Betriebsart sofort als Sollwert übernehmen" },
-        { "type": "RowLayout", "items": [
-            { "type": "SelectColor", "name": "AccentColor", "caption": "Akzentfarbe (heller Modus)" },
-            { "type": "SelectColor", "name": "AccentColorDark", "caption": "Akzentfarbe Dark Mode (transparent = wie hell)", "allowTransparent": true }
-        ] },
+        { "type": "Label", "caption": "Farben: zentral im Modul „Visu Design“ (Farbkonzept W5x)." },
         { "type": "SelectCategory", "name": "DetailID", "caption": "Einstellungsseite (optional): Kategorie, die das Regler-Symbol öffnet", "width": "600px" },
         { "type": "CheckBox", "name": "AlwaysOpen", "caption": "Wochenprogramm und Sollwerte immer zeigen (für die Instanz auf der Einstellungsseite)" }
     ],

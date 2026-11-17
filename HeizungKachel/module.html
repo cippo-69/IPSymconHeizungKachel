@@ -1,18 +1,22 @@
 <style>
 :root {
-  --hz-accent: #5ECAAB;    /* Akzentfarbe der Symcon-Kachel-Visu */
-  --hz-fg: #1E2224;        /* Anthrazit (Farbkonzept W5x) */
-  --hz-on-accent: #fff;    /* Symbol auf Akzentfläche */
   --hz-bg: rgba(0,0,0,.045);
   --hz-bg2: rgba(0,0,0,.075);
   --hz-line: rgba(0,0,0,.12);
   --hz-muted: rgba(0,0,0,.52);
   --hz-top: 58px;         /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
 }
+/* Farben aus dem Modul „Visu Design“ (--w5-*); die Werte nach dem Komma gelten ohne Design-Instanz */
+body {
+  --hz-accent: var(--w5-accent, #2F6B4F);
+  --hz-fg: var(--w5-fg, #1E2224);
+  --hz-on-accent: var(--w5-on, #fff);
+}
 /* Dark Mode: Bedienflächen deutlich heller als die Kachel */
 body.dark {
-  --hz-fg: #F1F0EB;        /* Kalkweiß */
-  --hz-on-accent: #1E2224; /* helle Akzente im Dark Mode tragen dunkle Symbole */
+  --hz-accent: var(--w5-accent, #74B892);
+  --hz-fg: var(--w5-fg, #F1F0EB);
+  --hz-on-accent: var(--w5-on, #1E2224);
   --hz-bg: rgba(255,255,255,.10);
   --hz-bg2: rgba(255,255,255,.15);
   --hz-line: rgba(255,255,255,.16);
