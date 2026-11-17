@@ -1,16 +1,18 @@
 <style>
 :root {
   --hz-accent: #5ECAAB;    /* Akzentfarbe der Symcon-Kachel-Visu */
-  --hz-fg: #1F2124;
+  --hz-fg: #1E2224;        /* Anthrazit (Farbkonzept W5x) */
+  --hz-on-accent: #fff;    /* Symbol auf Akzentfläche */
   --hz-bg: rgba(0,0,0,.045);
   --hz-bg2: rgba(0,0,0,.075);
   --hz-line: rgba(0,0,0,.12);
   --hz-muted: rgba(0,0,0,.52);
-  --hz-top: 58px;          /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
+  --hz-top: 58px;         /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
 }
 /* Dark Mode: Bedienflächen deutlich heller als die Kachel */
 body.dark {
-  --hz-fg: #F2F3F5;
+  --hz-fg: #F1F0EB;        /* Kalkweiß */
+  --hz-on-accent: #1E2224; /* helle Akzente im Dark Mode tragen dunkle Symbole */
   --hz-bg: rgba(255,255,255,.10);
   --hz-bg2: rgba(255,255,255,.15);
   --hz-line: rgba(255,255,255,.16);
@@ -58,7 +60,7 @@ body.solo .rb { width: 52px; height: 52px; font-size: 26px; }
 #hz .ib, #hz .ib svg { color: var(--hz-muted); }
 .ib svg { width: 20px; height: 20px; }
 .ib.on { background: var(--hz-accent); }
-#hz .ib.on, #hz .ib.on svg { color: #fff; }
+#hz .ib.on, #hz .ib.on svg { color: var(--hz-on-accent); }
 .mode { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--hz-bg2); align-self: flex-start; max-width: 100%; }
 .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 

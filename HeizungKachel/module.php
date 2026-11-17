@@ -34,7 +34,8 @@ class HeizungKachel extends IPSModuleStrict
         $this->RegisterPropertyFloat('MinTemp', 10.0);     // Bereich für Sollwert und Schieberegler
         $this->RegisterPropertyFloat('MaxTemp', 24.0);
         $this->RegisterPropertyBoolean('ApplyToCurrent', true);
-        $this->RegisterPropertyInteger('AccentColor', 0x5ECAAB); // Türkis der Symcon-Kachel-Visu
+        $this->RegisterPropertyInteger('AccentColor', 0x5ECAAB); // Türkis der Symcon-Kachel-Visu (heller Modus; ohne Dunkel-Farbe für beide)
+        $this->RegisterPropertyInteger('AccentColorDark', -1);   // Akzent im Dark Mode; -1 = wie AccentColor (Farbkonzept W5x: hell #8E2B26, dunkel #C9806C)
         $this->RegisterPropertyInteger('DetailID', 0);     // optional: Kategorie (Einstellungsseite), die das Regler-Symbol per openObject öffnet
         $this->RegisterPropertyBoolean('AlwaysOpen', false); // Wochenprogramm und Sollwerte immer zeigen (Instanz auf der Einstellungsseite)
 
@@ -106,8 +107,11 @@ class HeizungKachel extends IPSModuleStrict
     public function GetVisualizationTile(): string
     {
         $accent = sprintf('#%06X', $this->ReadPropertyInteger('AccentColor') & 0xFFFFFF);
+        $dark = $this->ReadPropertyInteger('AccentColorDark');
+        $accentDark = $dark >= 0 ? sprintf('#%06X', $dark & 0xFFFFFF) : $accent;
         $initial = '<script>handleMessage(' . json_encode(json_encode($this->BuildState())) . ');</script>';
-        return file_get_contents(__DIR__ . '/module.html') . '<style>:root{--hz-accent:' . $accent . ';}</style>' . $initial;
+        return file_get_contents(__DIR__ . '/module.html')
+            . '<style>:root{--hz-accent:' . $accent . ';}body.dark{--hz-accent:' . $accentDark . ';}</style>' . $initial;
     }
 
     public function RequestAction(string $Ident, mixed $Value): void

@@ -40,7 +40,8 @@ Kleine Kachel: Sollwert, Ist und Betriebsart. Ist eine Einstellungsseite (Eigens
 | Schrittweite | Raster für Sollwert und Schieberegler (Standard 1 K) |
 | Minimum / Maximum | Bereich für Sollwert und Schieberegler (Standard 10–24 °C) |
 | Laufende Betriebsart übernehmen | Änderung am Regler der aktiven Betriebsart sofort als Sollwert setzen |
-| Akzentfarbe | Farbe der Kachel |
+| Akzentfarbe (heller Modus) | Farbe für Schalter, heutigen Tag und aktives Regler-Symbol |
+| Akzentfarbe Dark Mode | eigene Farbe im Dark Mode der Visu; transparent = wie im hellen Modus |
 
 ## Lizenz
 
