@@ -1,5 +1,7 @@
 # Heizung Kachel
 
+Die Bibliothek enthält zwei Module: **Heizung Kachel** (Raum) und **Heizungsanlage Kachel** (Wärmeerzeuger, siehe unten).
+
 Kachel für die Symcon-Kachel-Visualisierung (HTML-SDK): ein Raum mit Ist- und Sollwert, Sollwertverstellung,
 Wochenprogramm und einem Schieberegler je Betriebsart (z. B. Heizbetrieb und Absenkbetrieb).
 
@@ -44,6 +46,42 @@ Kleine Kachel: Sollwert, Ist und Betriebsart. Ist eine Einstellungsseite (Eigens
 ## Farben
 
 Die Kachel hat keine eigenen Farbeinstellungen. Akzent, Text und Schrift auf Akzentflächen kommen aus dem Modul [Visu Design](https://github.com/cippo-69/IPSymconVisuDesign) (CSS-Variablen `--w5-*`, hell und Dark Mode). Ohne Design-Instanz gilt das Farbkonzept W5x (Tannengrün). Ein Theme-Wechsel kommt ohne Neuladen an: Die Kachel abonniert die Einstellungen der Design-Instanz und schickt das Design-CSS mit jedem Zustand mit (auch an zwischengespeicherte Kacheln). Die Farben der Betriebsarten stammen aus den Aktionen des Wochenplans.
+
+# Heizungsanlage Kachel
+
+Zweites Modul der Bibliothek: eine Kachel je Wärmeerzeuger (Kessel, später Wärmepumpe).
+
+## Inhalt der Kachel
+
+- **Betriebszustand** als Plakette: Meldung aktiv → Warmwasserladung (Kesselleistung über Schwelle) → Brenner (Leistung > 0) → Statustext → Pumpe → Bereit
+- **Außentemperatur**, **Vorlauf** (mit Soll), **Rücklauf** (mit Spreizung), **Warmwasser** (mit Soll)
+- **Meldungen**: aktive Alarmvariablen rot, mit Beginn
+- **Verlauf 24 h**: Vorlauf, Rücklauf und Warmwasser aus dem Archiv (5-Minuten-Mittel), erkannte Warmwasserladungen als Balken; Gasverbrauch heute (m³ und kWh) und Zahl der Warmwasserladungen heute. Aktualisierung alle 5 Minuten.
+- **Schalten**: frei konfigurierbar
+  - *Umschalten*: Boolean-Variable (RequestAction) oder Ereignis aktiv/inaktiv (zweites Ereignis wird mitgeschaltet)
+  - *Taste*: setzt einen Wert per RequestAction; Tasten mit gleicher Gruppe stehen als Umschalter in einer Zeile, die Status-Variable markiert die aktive Taste
+  - *Stufen*: − / + mit Schritt, Minimum und Maximum; angezeigt wird die Status-Variable (falls gesetzt)
+  - *Bestätigen*: Schaltung erst nach zweitem Tippen innerhalb von 4 s
+  - Jede Schaltung wird im Meldungsprotokoll unter „Heizungsanlage Kachel“ protokolliert
+- **Weitere Werte**: beliebige Variablen, formatiert nach Profil
+
+Kleine Kachel (unter 330 px Höhe): Zustand, Außentemperatur, Messwerte und aktive Meldungen.
+
+## Eigenschaften
+
+| Eigenschaft | Bedeutung |
+|---|---|
+| Außentemperatur, Vorlauf Ist/Soll, Rücklauf, Warmwasser Ist/Soll | Messwerte; nur Vorlauf ist Pflicht |
+| Brennerleistung | z. B. Modulation in %; > 0 = Brenner an |
+| Pumpe | Boolean |
+| Statustext | String; angezeigt wird der Teil vor „ – “ |
+| Leistung Kessel / Schwelle | elektrische Leistung des Kessels in W; über der Schwelle gilt Warmwasserladung (Erkennung und Zählung aus dem Archiv) |
+| Gaszähler / Umrechnung | archivierte Zählervariable in m³; Umrechnung in kWh/m³ (Brennwert × Zustandszahl) |
+| Meldungen | Liste: Variable, Bezeichnung; aktiv bei true bzw. ≠ 0 |
+| Schaltfunktionen | Liste: Bezeichnung, Art, Objekt, Objekt 2, Status, Wert, Schritt, Min, Max, Gruppe, Bestätigen |
+| Weitere Werte | Liste: Variable, Bezeichnung |
+
+Farben wie bei der Heizung Kachel aus dem Modul Visu Design; Vorlauf rot, Rücklauf blau, Warmwasser ocker.
 
 ## Lizenz
 

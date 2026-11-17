@@ -1,0 +1,63 @@
+{
+    "elements": [
+        { "type": "ExpansionPanel", "caption": "Messwerte", "expanded": true, "items": [
+            { "type": "SelectVariable", "name": "OutsideID", "caption": "Außentemperatur", "width": "600px" },
+            { "type": "SelectVariable", "name": "FlowID", "caption": "Vorlauf Ist", "width": "600px" },
+            { "type": "SelectVariable", "name": "FlowTargetID", "caption": "Vorlauf Soll (optional)", "width": "600px" },
+            { "type": "SelectVariable", "name": "ReturnID", "caption": "Rücklauf (optional)", "width": "600px" },
+            { "type": "SelectVariable", "name": "DhwID", "caption": "Warmwasser Ist (optional)", "width": "600px" },
+            { "type": "SelectVariable", "name": "DhwTargetID", "caption": "Warmwasser Soll (optional, Anzeige)", "width": "600px" }
+        ] },
+        { "type": "ExpansionPanel", "caption": "Betriebszustand", "items": [
+            { "type": "Label", "caption": "Reihenfolge: Warmwasserladung (Leistung über Schwelle) → Brennerleistung > 0 → Pumpe → Statustext → Bereit." },
+            { "type": "SelectVariable", "name": "BurnerID", "caption": "Brennerleistung (optional, z. B. Modulation in %)", "width": "600px" },
+            { "type": "SelectVariable", "name": "PumpID", "caption": "Pumpe ein/aus (optional)", "width": "600px" },
+            { "type": "SelectVariable", "name": "StatusID", "caption": "Statustext (optional, Text vor „ – “ wird angezeigt)", "width": "600px" },
+            { "type": "SelectVariable", "name": "ChargeID", "caption": "Leistung Kessel in W für Erkennung Warmwasserladung (optional)", "width": "600px" },
+            { "type": "NumberSpinner", "name": "ChargeThreshold", "caption": "Schwelle Warmwasserladung", "digits": 0, "suffix": " W" },
+            { "type": "SelectVariable", "name": "GasID", "caption": "Gaszähler (Zählervariable in m³, archiviert, optional)", "width": "600px" },
+            { "type": "NumberSpinner", "name": "GasFactor", "caption": "Umrechnung Gas", "digits": 3, "suffix": " kWh/m³" }
+        ] },
+        { "type": "ExpansionPanel", "caption": "Meldungen", "items": [
+            { "type": "Label", "caption": "Aktiv bei Boolean = true bzw. Zahl ≠ 0. Aktive Meldungen erscheinen rot oben in der Kachel." },
+            { "type": "List", "name": "Alarms", "caption": "Meldungen", "add": true, "delete": true, "rowCount": 8, "columns": [
+                { "caption": "Variable", "name": "ObjectID", "width": "320px", "add": 0, "edit": { "type": "SelectVariable" } },
+                { "caption": "Bezeichnung", "name": "Caption", "width": "auto", "add": "", "edit": { "type": "ValidationTextBox" } }
+            ] }
+        ] },
+        { "type": "ExpansionPanel", "caption": "Schaltfunktionen", "items": [
+            { "type": "Label", "caption": "Umschalten: Boolean-Variable oder Ereignis (Objekt 2: zweites Ereignis, wird mitgeschaltet). Taste: setzt den Wert per RequestAction, Status-Variable zeigt den aktiven Zustand. Gleiche Gruppe = Tasten in einer Zeile. Stufen: Zahl mit − / +." },
+            { "type": "List", "name": "Controls", "caption": "Schaltfunktionen", "add": true, "delete": true, "rowCount": 8, "columns": [
+                { "caption": "Bezeichnung", "name": "Caption", "width": "200px", "add": "", "edit": { "type": "ValidationTextBox" } },
+                { "caption": "Art", "name": "Type", "width": "130px", "add": "toggle", "edit": { "type": "Select", "options": [
+                    { "caption": "Umschalten", "value": "toggle" },
+                    { "caption": "Taste", "value": "button" },
+                    { "caption": "Stufen", "value": "step" }
+                ] } },
+                { "caption": "Objekt", "name": "ObjectID", "width": "220px", "add": 0, "edit": { "type": "SelectObject" } },
+                { "caption": "Objekt 2", "name": "ObjectID2", "width": "220px", "add": 0, "edit": { "type": "SelectObject" } },
+                { "caption": "Status", "name": "StateID", "width": "220px", "add": 0, "edit": { "type": "SelectVariable" } },
+                { "caption": "Wert (Taste)", "name": "Value", "width": "90px", "add": 1, "edit": { "type": "NumberSpinner", "digits": 1 } },
+                { "caption": "Schritt", "name": "Step", "width": "70px", "add": 1, "edit": { "type": "NumberSpinner", "digits": 1 } },
+                { "caption": "Min", "name": "Min", "width": "70px", "add": 0, "edit": { "type": "NumberSpinner", "digits": 1 } },
+                { "caption": "Max", "name": "Max", "width": "70px", "add": 100, "edit": { "type": "NumberSpinner", "digits": 1 } },
+                { "caption": "Gruppe", "name": "Group", "width": "110px", "add": "", "edit": { "type": "ValidationTextBox" } },
+                { "caption": "Bestätigen", "name": "Confirm", "width": "90px", "add": false, "edit": { "type": "CheckBox" } }
+            ] }
+        ] },
+        { "type": "ExpansionPanel", "caption": "Weitere Werte", "items": [
+            { "type": "List", "name": "Infos", "caption": "Werte (formatiert angezeigt)", "add": true, "delete": true, "rowCount": 8, "columns": [
+                { "caption": "Variable", "name": "ObjectID", "width": "320px", "add": 0, "edit": { "type": "SelectVariable" } },
+                { "caption": "Bezeichnung", "name": "Caption", "width": "auto", "add": "", "edit": { "type": "ValidationTextBox" } }
+            ] }
+        ] },
+        { "type": "Label", "caption": "Verlauf: Vorlauf, Rücklauf und Warmwasser der letzten 24 h aus dem Archiv (5-Minuten-Mittel), alle 5 Minuten aktualisiert. Farben aus „Visu Design“." }
+    ],
+    "actions": [
+        { "type": "Button", "caption": "Verlauf jetzt aktualisieren", "onClick": "HZA_Refresh($id);" }
+    ],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Aktiv" },
+        { "code": 202, "icon": "error", "caption": "Keine gültige Vorlauf-Variable ausgewählt" }
+    ]
+}

@@ -1,0 +1,14 @@
+{
+    "id": "{8793E9BB-DF1D-40E6-8FCE-011663E204D6}",
+    "name": "HeizungsanlageKachel",
+    "type": 3,
+    "vendor": "",
+    "aliases": [
+        "Heizungsanlage Kachel"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "HZA",
+    "url": "https://github.com/cippo-69/IPSymconHeizungKachel"
+}
