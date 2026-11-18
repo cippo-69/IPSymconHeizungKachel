@@ -111,11 +111,11 @@ class HeizungKachel extends IPSModuleStrict
     public function GetVisualizationTile(): string
     {
         $initial = '<script>handleMessage(' . json_encode(json_encode($this->BuildState())) . ');</script>';
-        return $this->DesignStyle() . file_get_contents(__DIR__ . '/module.html') . $initial;
+        return $this->DesignStyle() . file_get_contents(__DIR__ . '/module.html') . $this->DesignScript() . $initial;
     }
 
     /**
-     * Farben aus dem Modul „Visu Design“ (W5D); ohne Instanz gelten die Vorgaben im module.html.
+     * Farben und Kachel-Bausteine aus dem Modul „Visu Design“ (ab 1.7: W5D_GetCSS + W5D_GetTileCSS).
      * Das CSS steht im Element #w5d und kommt zusätzlich mit jedem Zustand mit (Feld design), damit ein
      * Theme-Wechsel auch in zwischengespeicherten Kacheln ohne Neuladen ankommt.
      */
@@ -138,7 +138,17 @@ class HeizungKachel extends IPSModuleStrict
     private function DesignCSS(): string
     {
         $id = $this->DesignID();
-        return $id > 0 && function_exists('W5D_GetCSS') ? W5D_GetCSS($id) : '';
+        if ($id <= 0 || !function_exists('W5D_GetCSS')) {
+            return '';
+        }
+        return W5D_GetCSS($id) . (function_exists('W5D_GetTileCSS') ? W5D_GetTileCSS($id) : '');
+    }
+
+    /** Hell/Dunkel-Erkennung (w5tTheme) aus Visu Design */
+    private function DesignScript(): string
+    {
+        $id = $this->DesignID();
+        return $id > 0 && function_exists('W5D_GetTileJS') ? '<script>' . W5D_GetTileJS($id) . '</script>' : '';
     }
 
     public function RequestAction(string $Ident, mixed $Value): void
