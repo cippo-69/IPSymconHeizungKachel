@@ -45,7 +45,7 @@ Kleine Kachel: Sollwert, Ist und Betriebsart. Ist eine Einstellungsseite (Eigens
 
 ## Farben
 
-Die Kachel hat keine eigenen Farbeinstellungen. Akzent, Text und Schrift auf Akzentflächen kommen aus dem Modul [Visu Design](https://github.com/cippo-69/IPSymconVisuDesign) (CSS-Variablen `--w5-*`, hell und Dark Mode). Ohne Design-Instanz gilt das Farbkonzept W5x (Tannengrün). Ein Theme-Wechsel kommt ohne Neuladen an: Die Kachel abonniert die Einstellungen der Design-Instanz und schickt das Design-CSS mit jedem Zustand mit (auch an zwischengespeicherte Kacheln). Die Farben der Betriebsarten stammen aus den Aktionen des Wochenplans.
+Die Kachel hat keine eigenen Farbeinstellungen. Farben, Layout-Bausteine und Hell/Dunkel-Erkennung kommen aus dem Modul [Visu Design](https://github.com/cippo-69/IPSymconVisuDesign) ab Version 1.7 (`W5D_GetCSS`, `W5D_GetTileCSS`, `W5D_GetTileJS`); im module.html steht nur CSS für Sonderelemente (Kopf Soll/Ist, Wochenprogramm, Sollwerte je Betriebsart) mit Farben aus Visu Design. Ein Theme-Wechsel kommt ohne Neuladen an: Die Kachel abonniert die Einstellungen der Design-Instanz und schickt das Design-CSS mit jedem Zustand mit (auch an zwischengespeicherte Kacheln). Die Farben der Betriebsarten stammen aus den Aktionen des Wochenplans.
 
 # Heizungsanlage Kachel
 
@@ -85,7 +85,7 @@ Kleine Kachel (unter 330 px Höhe): Zustand, Außentemperatur, Messwerte und akt
 | Schaltfunktionen | Liste: Bezeichnung, Art, Objekt, Objekt 2, Status, Wert, Schritt, Min, Max, Gruppe, Bestätigen |
 | Weitere Werte | Liste: Variable, Bezeichnung |
 
-Farben wie bei der Heizung Kachel aus dem Modul Visu Design; Vorlauf rot, Rücklauf blau, Warmwasser ocker.
+Farben wie bei der Heizung Kachel aus dem Modul Visu Design (ab 1.7); Vorlauf `--w5t-hot` (rot), Rücklauf `--w5t-cold` (blau), Warmwasser `--w5t-warm` (ocker). Im module.html steht nur CSS für Sonderelemente (Zustandsplakette, Messwerte, Verlaufsdiagramm).
 
 ## Lizenz
 
