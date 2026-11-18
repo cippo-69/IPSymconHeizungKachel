@@ -18,7 +18,10 @@
 #hz .soll .v { font-size: 26px; font-weight: 500; min-width: 76px; text-align: center; }
 #hz .mrow { display: flex; align-items: center; gap: 10px; min-height: 40px; }
 #hz .mrow .ib { margin-left: auto; }
-#hz .mode { white-space: normal; align-self: flex-start; max-width: 100%; min-width: 0; }
+/* Betriebsart: Visu-Design-Chip ist flex:none/nowrap – hier darf er schrumpfen und umbrechen, sonst schiebt er das Regler-Symbol aus der Kachel */
+#hz .mode { white-space: normal; align-self: flex-start; max-width: 100%; min-width: 0; flex: 0 1 auto; }
+#hz .mode span:last-child { min-width: 0; overflow-wrap: anywhere; }
+#hz .mrow { min-width: 0; max-width: 100%; }
 /* nur Sollwert (kein Ist, kein Wochenplan): Bedienung mittig in der Kachel */
 body.solo #hz { justify-content: center; align-items: center; }
 body.solo #hz .head { justify-content: center; }
