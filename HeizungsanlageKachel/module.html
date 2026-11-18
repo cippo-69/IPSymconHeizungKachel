@@ -1,142 +1,67 @@
+<!-- Layout und Farben kommen aus „Visu Design“ (W5D_GetCSS + W5D_GetTileCSS, Bausteine laut README, ab 1.7).
+     Hier nur Sonderelemente (Zustandsplakette, Messwerte, Verlaufsdiagramm), ausschließlich mit Farben aus Visu Design
+     (Vorlauf --w5t-hot, Rücklauf --w5t-cold, Warmwasser --w5t-warm). -->
 <style>
-:root {
-  --ha-bg: rgba(0,0,0,.045);
-  --ha-bg2: rgba(0,0,0,.075);
-  --ha-line: rgba(0,0,0,.12);
-  --ha-muted: rgba(0,0,0,.52);
-  --ha-top: 58px;           /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
-  --ha-vl: #D2553F;         /* Vorlauf */
-  --ha-rl: #3F7FD2;         /* Rücklauf */
-  --ha-ww: #D08A1E;         /* Warmwasser / Ladung */
-  --ha-alarm: #C0392B;
-}
-/* Farben aus dem Modul „Visu Design“ (--w5-*); die Werte nach dem Komma gelten ohne Design-Instanz */
-body {
-  --ha-accent: var(--w5-accent, #2F6B4F);
-  --ha-fg: var(--w5-fg, #1E2224);
-  --ha-on-accent: var(--w5-on, #fff);
-}
-body.dark {
-  --ha-accent: var(--w5-accent, #74B892);
-  --ha-fg: var(--w5-fg, #F1F0EB);
-  --ha-on-accent: var(--w5-on, #1E2224);
-  --ha-bg: rgba(255,255,255,.10);
-  --ha-bg2: rgba(255,255,255,.15);
-  --ha-line: rgba(255,255,255,.16);
-  --ha-muted: rgba(255,255,255,.6);
-  --ha-vl: #F07A64;
-  --ha-rl: #6FA4EE;
-  --ha-ww: #E9A940;
-  --ha-alarm: #F06A5B;
-}
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
-body { font-family: 'Poppins', 'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 14px; line-height: 1.35; }
-button { font: inherit; }
-#ha, #ha div, #ha span, #ha b { color: var(--ha-fg); }
-#ha .lbl, #ha .sub, #ha .facts, #ha .facts span, #ha .info .k, #ha .ax, #ha .hint, #ha .at small { color: var(--ha-muted); }
-#ha { position: absolute; inset: 0; padding: var(--ha-top) 16px 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.lbl { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
-
 /* Kopf: Zustand links, Außentemperatur rechts */
-.head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.state { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 999px; background: var(--ha-bg2); min-width: 0; max-width: 70%; }
-.state span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.state svg { width: 16px; height: 16px; flex: none; }
-#ha .state.burn, #ha .state.burn span { color: var(--ha-vl); }
-#ha .state.dhw, #ha .state.dhw span { color: var(--ha-ww); }
-#ha .state.alarm { background: var(--ha-alarm); }
-#ha .state.alarm, #ha .state.alarm span { color: #fff; }
-.state.burn svg, .state.dhw svg { animation: pulse 1.6s ease-in-out infinite; }
-@keyframes pulse { 50% { opacity: .45; } }
-.at { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 400; }
-.at small { font-size: 11px; display: block; letter-spacing: .06em; text-transform: uppercase; font-weight: 500; }
-
+#ha .head { align-items: center; gap: 10px; }
+#ha .state { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 999px; background: var(--w5t-bg2); min-width: 0; max-width: 70%; }
+#ha .state span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#ha .state svg { width: 16px; height: 16px; flex: none; }
+#ha .state.burn, #ha .state.burn span { color: var(--w5t-hot); }
+#ha .state.dhw, #ha .state.dhw span { color: var(--w5t-warm); }
+#ha .state.alarm { background: var(--w5t-bad); }
+#ha .state.alarm, #ha .state.alarm span { color: var(--w5t-on); }
+#ha .state.burn svg, #ha .state.dhw svg { animation: w5tp 1.6s ease-in-out infinite; }
+#ha .at { text-align: right; white-space: nowrap; font-size: 20px; }
 /* Messwerte */
-.grid { display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); gap: 8px; }
-.m { background: var(--ha-bg); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; border-top: 3px solid var(--c, transparent); }
-.m .v { font-size: 28px; font-weight: 300; line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.m .v small { font-size: 14px; margin-left: 1px; }
-.m .sub { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.card { background: var(--ha-bg); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
-.card .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-
+#ha .mets { display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); gap: 8px; }
+#ha .m { background: var(--w5t-bg); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; border-top: 3px solid var(--c, transparent); }
+#ha .m .v { font-size: 28px; font-weight: 300; line-height: 1.1; white-space: nowrap; }
+#ha .m .v small { font-size: 14px; margin-left: 1px; }
+#ha .m .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Meldungen */
-.alarms { border-left: 4px solid var(--ha-alarm); }
-.al { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-#ha .al b { color: var(--ha-alarm); font-weight: 600; }
-#ha .al span { color: var(--ha-muted); font-size: 12px; white-space: nowrap; }
-
+#ha .al { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+#ha .al b { font-weight: 600; }
+#ha .al .sub { white-space: nowrap; }
 /* Verlauf */
-.nav { display: flex; align-items: center; gap: 8px; }
-.rng { flex: 1; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rb.sm { width: 34px; height: 34px; font-size: 20px; flex: none; }
-.rb:disabled { opacity: .35; cursor: default; }
-.pb.sm { min-height: 30px; padding: 4px 12px; font-size: 12px; }
-#ha .live { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ha-accent); padding: 0 6px; }
-.seg.sm button { padding: 4px 10px; min-height: 28px; font-size: 12px; }
-.plot { position: relative; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; min-height: 130px; }
-.plot:active { cursor: grabbing; }
-.plot .load { height: 130px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ha-muted); }
-.chart .cur { stroke: var(--ha-fg); stroke-width: 1; opacity: .5; }
-.chart .dl { stroke-dasharray: 3 3; }
-.yl { position: absolute; top: 0; bottom: 0; right: 2px; display: flex; flex-direction: column; justify-content: space-between; font-size: 10px; pointer-events: none; }
-#ha .yl span { color: var(--ha-muted); }
-.tip { position: absolute; top: -6px; display: none; flex-wrap: wrap; gap: 2px 10px; max-width: 100%; font-size: 11px; padding: 5px 8px; border-radius: 8px; background: var(--ha-bg2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); pointer-events: none; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
-.tip b { width: 100%; font-weight: 600; }
-.tip i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
-.chart svg { width: 100%; height: 130px; touch-action: pan-y; display: block; overflow: visible; }
-.chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.chart .gl { stroke: var(--ha-line); stroke-width: 1; }
-.chart .ch { fill: var(--ha-ww); opacity: .18; }
-.ax { font-size: 10px; display: flex; justify-content: space-between; line-height: 1.25; }
-.ax span { text-align: center; }
-.ax span:first-child { text-align: left; }
-.ax span:last-child { text-align: right; }
-.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; }
-.legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
-.facts { display: flex; gap: 4px 14px; flex-wrap: wrap; font-size: 12px; }
-#ha .facts b { font-weight: 600; }
-
-/* Schaltfunktionen */
-.ctl { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; }
-.ctl + .ctl { border-top: 1px solid var(--ha-line); padding-top: 8px; }
-.ctl .n { min-width: 0; }
-.ctl .n div:last-child { font-size: 11px; }
-#ha .ctl .q { color: var(--ha-alarm); font-weight: 600; }
-.tg { position: relative; width: 52px; height: 30px; border-radius: 15px; background: var(--ha-line); border: 0; cursor: pointer; padding: 0; flex: none; touch-action: manipulation; }
-.tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .15s; }
-.tg.on { background: var(--ha-accent); }
-.tg.on::after { left: 25px; }
-.tg.ask, .seg button.ask, .pb.ask { outline: 2px solid var(--ha-alarm); outline-offset: 2px; }
-.seg { display: inline-flex; background: var(--ha-bg2); border-radius: 999px; padding: 3px; gap: 2px; flex: none; }
-.seg button { border: 0; background: none; color: var(--ha-fg); border-radius: 999px; padding: 7px 14px; min-height: 36px; cursor: pointer; font-size: 13px; font-weight: 500; touch-action: manipulation; }
-.seg button.on { background: var(--ha-accent); color: var(--ha-on-accent); }
-.pb { border: 1px solid var(--ha-accent); background: none; color: var(--ha-accent); border-radius: 999px; padding: 7px 16px; min-height: 40px; cursor: pointer; font-weight: 600; font-size: 13px; flex: none; touch-action: manipulation; }
-.pb.on { background: var(--ha-accent); color: var(--ha-on-accent); }
-.st { display: inline-flex; align-items: center; gap: 6px; flex: none; }
-.st .val { min-width: 64px; text-align: center; font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
-.rb { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--ha-bg2); color: var(--ha-fg); font-size: 20px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; touch-action: manipulation; }
-.rb:active, .pb:active, .seg button:active { transform: scale(.94); }
-
-/* weitere Werte */
-.info { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 13px; }
-.info .v { text-align: right; font-variant-numeric: tabular-nums; }
-.hint { font-size: 11px; }
-
+#ha .nav { display: flex; align-items: center; gap: 8px; }
+#ha .when { flex: 1; text-align: center; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ha .live { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--w5t-accent); padding: 0 6px; }
+#ha .plot { position: relative; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; min-height: 130px; }
+#ha .plot:active { cursor: grabbing; }
+#ha .plot .load { height: 130px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--w5t-muted); }
+#ha .chart svg { width: 100%; height: 130px; touch-action: pan-y; display: block; overflow: visible; }
+#ha .chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+#ha .chart .gl { stroke: var(--w5t-line); stroke-width: 1; }
+#ha .chart .dl { stroke-dasharray: 3 3; }
+#ha .chart .ch { fill: var(--w5t-warm); opacity: .18; }
+#ha .chart .cur { stroke: var(--w5t-fg); stroke-width: 1; opacity: .5; }
+#ha .yl { position: absolute; top: 0; bottom: 0; right: 2px; display: flex; flex-direction: column; justify-content: space-between; font-size: 10px; pointer-events: none; }
+#ha .yl span { color: var(--w5t-muted); }
+#ha .tip { position: absolute; top: -6px; display: none; flex-wrap: wrap; gap: 2px 10px; max-width: 100%; font-size: 11px; padding: 5px 8px; border-radius: 8px; background: var(--w5t-bg2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); pointer-events: none; box-shadow: 0 1px 4px var(--w5t-shadow); }
+#ha .tip b { width: 100%; font-weight: 600; }
+#ha .tip i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+#ha .ax { font-size: 10px; display: flex; justify-content: space-between; line-height: 1.25; }
+#ha .ax span { text-align: center; color: var(--w5t-muted); }
+#ha .ax span:first-child { text-align: left; }
+#ha .ax span:last-child { text-align: right; }
+#ha .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+#ha .legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+#ha .facts { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 14px; text-align: left; white-space: normal; }
+/* Schalten: Stufen mit − / + */
+#ha .stp { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+#ha .stp .v { min-width: 64px; text-align: center; font-size: 18px; font-weight: 500; }
+#ha .row .seg { flex: none; }
 @media (max-width: 420px) {
-  #ha { padding-left: 12px; padding-right: 12px; }
-  .m { padding: 8px 10px; }
-  .m .v { font-size: 23px; }
+  #ha .m { padding: 8px 10px; }
+  #ha .m .v { font-size: 23px; }
 }
-/* kleine Kachel: nur Kopf und Messwerte */
-body.compact #ha { gap: 8px; }
-body.compact .m .v { font-size: 22px; }
-body.compact .card { display: none; }
-body.compact .card.alarms { display: flex; }
+/* kleine Kachel: nur Kopf, Messwerte und Meldungen */
+body.compact #ha .m .v { font-size: 22px; }
+body.compact #ha .card { display: none; }
+body.compact #ha .card.alarm { display: flex; }
 </style>
-<div id="ha"></div>
+<div id="ha" class="w5t fill"></div>
 <script>
 var HA = { s: null, ask: null, askT: 0 };
 var ICON = {
@@ -182,21 +107,17 @@ function since(ts) {
 }
 function send(ident, value) { if (typeof requestAction === 'function') requestAction(ident, value); }
 
-function theme() {
-  var b = document.body, m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(b).color || ''), dark;
-  if (m) dark = (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255 > 0.5;
-  else dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  b.classList.toggle('dark', dark);
-}
+/* Hell/Dunkel übernimmt W5D_GetTileJS (w5tTheme); ohne Design-Modul bleibt der helle Modus */
+function theme() { if (typeof w5tTheme === 'function') w5tTheme(); }
 
 function metric(lbl, v, sub, color) {
-  return '<div class="m" style="--c:' + color + '"><div class="lbl">' + lbl + '</div><div class="v">' + fmt(v, 1) + '<small>°</small></div><div class="sub">' + (sub || '&nbsp;') + '</div></div>';
+  return '<div class="m" style="--c:' + color + '"><div class="lbl">' + lbl + '</div><div class="v num">' + fmt(v, 1) + '<small>°</small></div><div class="sub">' + (sub || '&nbsp;') + '</div></div>';
 }
 
 /* ---------- Verlauf: verschiebbar, Zeitraum wählbar, Werte mit Datum und Uhrzeit ---------- */
 var WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 var SPANS = [[21600, '6 h'], [86400, '24 h'], [259200, '3 T'], [604800, '7 T']];
-var COL = { vl: 'var(--ha-vl)', rl: 'var(--ha-rl)', ww: 'var(--ha-ww)' }, NAME = { vl: 'Vorlauf', rl: 'Rücklauf', ww: 'Warmwasser' };
+var COL = { vl: 'var(--w5t-hot)', rl: 'var(--w5t-cold)', ww: 'var(--w5t-warm)' }, NAME = { vl: 'Vorlauf', rl: 'Rücklauf', ww: 'Warmwasser' };
 // end null = live (bis jetzt); data = Antwort auf die eigene Anfrage (req)
 HA.v = { end: null, span: 86400, data: null, req: null, histT: 0, drag: null, pending: false };
 
@@ -226,11 +147,11 @@ function chartCard(facts) {
   var se = d ? d.series || {} : {}, keys = ['vl', 'rl', 'ww'].filter(function (k) { return se[k] && se[k].length > 1; });
   if (d && !keys.length && isLive24()) return fx ? '<div class="card">' + fx + '</div>' : '';
   var to = d ? d.to : viewEnd(), from = d ? d.from : to - HA.v.span, span = to - from;
-  var h = '<div class="card chart"><div class="top"><span class="lbl">Verlauf</span><span class="seg sm">';
+  var h = '<div class="card chart"><div class="row"><span class="lbl">Verlauf</span><span class="seg sm">';
   SPANS.forEach(function (x) { h += '<button class="' + (HA.v.span === x[0] ? 'on' : '') + '" data-span="' + x[0] + '">' + x[1] + '</button>'; });
-  h += '</span></div><div class="nav"><button class="rb sm" data-nav="-1" aria-label="zurück">‹</button><span class="rng" id="rng">' + dt(from, true) + ' – ' + dt(to, false) + '</span>'
-    + '<button class="rb sm" data-nav="1" aria-label="vor"' + (HA.v.end === null ? ' disabled' : '') + '>›</button>'
-    + (HA.v.end === null ? '<span class="live">live</span>' : '<button class="pb sm" data-nav="0">Jetzt</button>') + '</div>';
+  h += '</span></div><div class="nav"><button class="ib plain sm" data-nav="-1" aria-label="zurück">‹</button><span class="when num" id="rng">' + dt(from, true) + ' – ' + dt(to, false) + '</span>'
+    + '<button class="ib plain sm" data-nav="1" aria-label="vor"' + (HA.v.end === null ? ' disabled' : '') + '>›</button>'
+    + (HA.v.end === null ? '<span class="live">live</span>' : '<button class="btn acc sm" data-nav="0">Jetzt</button>') + '</div>';
   h += '<div class="plot" id="plot">';
   if (!d) h += '<div class="load">lädt …</div>';
   else if (!keys.length) h += '<div class="load">keine Daten im Zeitraum</div>';
@@ -257,7 +178,7 @@ function chartCard(facts) {
   for (var i = 0; i <= 4; i++) { var ts = from + span * i / 4, dd = new Date(ts * 1000); h += '<span>' + WD[dd.getDay()] + ' ' + pad(dd.getDate()) + '.' + pad(dd.getMonth() + 1) + '.<br>' + pad(dd.getHours()) + ':' + pad(dd.getMinutes()) + '</span>'; }
   h += '</div><div class="legend">';
   keys.forEach(function (k) { h += '<span><i style="background:' + COL[k] + '"></i>' + NAME[k] + '</span>'; });
-  if (d && (d.chargeTimes || []).length) h += '<span><i style="background:var(--ha-ww);opacity:.4;height:10px"></i>WW-Ladung</span>';
+  if (d && (d.chargeTimes || []).length) h += '<span><i style="background:var(--w5t-warm);opacity:.4;height:10px"></i>WW-Ladung</span>';
   return h + '</div>' + fx + '</div>';
 }
 
@@ -318,8 +239,8 @@ function ctlHtml(c, grouped) {
   if (c.type === 'toggle') return '<button class="tg' + (c.on ? ' on' : '') + cls + '" data-i="' + c.i + '" aria-label="' + esc(c.t) + '"></button>';
   if (c.type === 'button') return grouped
     ? '<button class="' + (c.on ? 'on' : '') + cls + '" data-i="' + c.i + '">' + esc(c.t) + '</button>'
-    : '<button class="pb' + (c.on ? ' on' : '') + cls + '" data-i="' + c.i + '">' + (ask ? 'Bestätigen' : 'Start') + '</button>';
-  if (c.type === 'step') return '<span class="st"><button class="rb" data-i="' + c.i + '" data-d="-1" aria-label="' + esc(c.t) + ' senken">−</button><span class="val">' + esc(c.v) + '</span><button class="rb" data-i="' + c.i + '" data-d="1" aria-label="' + esc(c.t) + ' erhöhen">+</button></span>';
+    : '<button class="btn acc' + (c.on ? ' solid' : '') + cls + '" data-i="' + c.i + '">' + (ask ? 'Bestätigen' : 'Start') + '</button>';
+  if (c.type === 'step') return '<span class="stp"><button class="ib plain" data-i="' + c.i + '" data-d="-1" aria-label="' + esc(c.t) + ' senken">−</button><span class="v num">' + esc(c.v) + '</span><button class="ib plain" data-i="' + c.i + '" data-d="1" aria-label="' + esc(c.t) + ' erhöhen">+</button></span>';
   return '';
 }
 
@@ -331,18 +252,18 @@ function render() {
   var st = s.state || { k: 'idle', t: '' }, hi = s.hist || {}, h = '';
 
   h += '<div class="head"><div class="state ' + st.k + '">' + ICON[SICON[st.k] || 'idle'] + '<span>' + esc(st.t) + '</span></div>';
-  if (s.at !== null) h += '<div class="at"><small>Außen</small>' + fmt(s.at, 1) + '°</div>';
+  if (s.at !== null) h += '<div class="at num"><div class="lbl">Außen</div>' + fmt(s.at, 1) + '°</div>';
   h += '</div>';
 
   var ms = [];
-  if (s.vl !== null) ms.push(metric('Vorlauf', s.vl, s.vlSoll !== null ? 'Soll ' + fmt(s.vlSoll, 0) + '°' : '', 'var(--ha-vl)'));
-  if (s.rl !== null) ms.push(metric('Rücklauf', s.rl, s.vl !== null ? 'Δ ' + fmt(s.vl - s.rl, 1) + ' K' : '', 'var(--ha-rl)'));
-  if (s.ww !== null) ms.push(metric('Warmwasser', s.ww, s.wwSoll !== null ? 'Soll ' + fmt(s.wwSoll, 0) + '°' : '', 'var(--ha-ww)'));
-  if (ms.length) h += '<div class="grid" style="--n:' + ms.length + '">' + ms.join('') + '</div>';
+  if (s.vl !== null) ms.push(metric('Vorlauf', s.vl, s.vlSoll !== null ? 'Soll ' + fmt(s.vlSoll, 0) + '°' : '', COL.vl));
+  if (s.rl !== null) ms.push(metric('Rücklauf', s.rl, s.vl !== null ? 'Δ ' + fmt(s.vl - s.rl, 1) + ' K' : '', COL.rl));
+  if (s.ww !== null) ms.push(metric('Warmwasser', s.ww, s.wwSoll !== null ? 'Soll ' + fmt(s.wwSoll, 0) + '°' : '', COL.ww));
+  if (ms.length) h += '<div class="mets" style="--n:' + ms.length + '">' + ms.join('') + '</div>';
 
   if ((s.alarms || []).length) {
-    h += '<div class="card alarms"><div class="lbl">Meldungen</div>';
-    s.alarms.forEach(function (a) { h += '<div class="al"><b>' + esc(a.t) + '</b><span>' + since(a.since) + '</span></div>'; });
+    h += '<div class="card alarm"><div class="lbl">Meldungen</div>';
+    s.alarms.forEach(function (a) { h += '<div class="al"><b class="bad">' + esc(a.t) + '</b><span class="sub">' + since(a.since) + '</span></div>'; });
     if (st.x) h += '<div class="hint">' + esc(st.x) + '</div>';
     h += '</div>';
   }
@@ -360,17 +281,17 @@ function render() {
       if (c.g && c.type === 'button') {
         if (done[c.g]) return; done[c.g] = 1;
         var grp = cs.filter(function (x) { return x.g === c.g && x.type === 'button'; }), q = grp.some(function (x) { return HA.ask === x.i; });
-        h += '<div class="ctl"><div class="n"><div>' + esc(c.g) + '</div>' + (q ? '<div class="q">nochmal tippen zum Bestätigen</div>' : '') + '</div><div class="seg">' + grp.map(function (x) { return ctlHtml(x, true); }).join('') + '</div></div>';
+        h += '<div class="row"><div class="t"><span>' + esc(c.g) + '</span>' + (q ? '<span class="sub bad">nochmal tippen zum Bestätigen</span>' : '') + '</div><div class="seg">' + grp.map(function (x) { return ctlHtml(x, true); }).join('') + '</div></div>';
         return;
       }
-      h += '<div class="ctl"><div class="n"><div>' + esc(c.t) + '</div>' + (HA.ask === c.i ? '<div class="q">nochmal tippen zum Bestätigen</div>' : '') + '</div>' + ctlHtml(c, false) + '</div>';
+      h += '<div class="row"><div class="t"><span>' + esc(c.t) + '</span>' + (HA.ask === c.i ? '<span class="sub bad">nochmal tippen zum Bestätigen</span>' : '') + '</div>' + ctlHtml(c, false) + '</div>';
     });
     h += '</div>';
   }
 
   if ((s.infos || []).length) {
-    h += '<div class="card"><div class="lbl">Weitere Werte</div><div class="info">';
-    s.infos.forEach(function (i) { h += '<div class="k">' + esc(i.t) + '</div><div class="v">' + esc(i.v) + '</div>'; });
+    h += '<div class="card"><div class="lbl">Weitere Werte</div><div class="kv">';
+    s.infos.forEach(function (i) { h += '<span>' + esc(i.t) + '</span><b>' + esc(i.v) + '</b>'; });
     h += '</div></div>';
   }
 
