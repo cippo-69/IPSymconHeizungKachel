@@ -1,157 +1,92 @@
+<!-- Layout und Farben kommen aus „Visu Design“ (W5D_GetCSS + W5D_GetTileCSS, Bausteine laut README, ab 1.7).
+     Hier nur Sonderelemente (Kopf Soll/Ist, Wochenprogramm, Sollwerte je Betriebsart), ausschließlich mit Farben aus Visu Design. -->
 <style>
-:root {
-  --hz-bg: rgba(0,0,0,.045);
-  --hz-bg2: rgba(0,0,0,.075);
-  --hz-line: rgba(0,0,0,.12);
-  --hz-muted: rgba(0,0,0,.52);
-  --hz-top: 58px;         /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
-}
-/* Farben aus dem Modul „Visu Design“ (--w5-*); die Werte nach dem Komma gelten ohne Design-Instanz */
-body {
-  --hz-accent: var(--w5-accent, #2F6B4F);
-  --hz-fg: var(--w5-fg, #1E2224);
-  --hz-on-accent: var(--w5-on, #fff);
-}
-/* Dark Mode: Bedienflächen deutlich heller als die Kachel */
-body.dark {
-  --hz-accent: var(--w5-accent, #74B892);
-  --hz-fg: var(--w5-fg, #F1F0EB);
-  --hz-on-accent: var(--w5-on, #1E2224);
-  --hz-bg: rgba(255,255,255,.10);
-  --hz-bg2: rgba(255,255,255,.15);
-  --hz-line: rgba(255,255,255,.16);
-  --hz-muted: rgba(255,255,255,.6);
-}
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
-body { font-family: 'Poppins', 'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 14px; line-height: 1.35; }
-button, select, input { font: inherit; color: var(--hz-fg); }
-#hz, #hz div, #hz span, #hz b { color: var(--hz-fg); }
-#hz .lbl, #hz .facts, #hz .facts span, #hz .tgl, #hz .hint, #hz .ticks span, #hz .scale span, #hz .wk .chev { color: var(--hz-muted); }
-#hz .wk.today .d { color: var(--hz-accent); }
-#hz .sp .badge { color: #fff; }
-#hz { position: absolute; inset: 0; padding: var(--hz-top) 16px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.lbl { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--hz-muted); }
-
+#hz { gap: 14px; }
 /* Kopf: Soll links, Ist rechts (Vorgabe für alle Ansichten) */
-.head { display: flex; flex-direction: row-reverse; align-items: stretch; justify-content: space-between; gap: 12px; }
-.head.solo .ist { display: none; }
-.head.solo { justify-content: flex-end; }   /* row-reverse: flex-end = links */
-.head.solo .soll { align-items: flex-start; }
+#hz .head { flex-direction: row-reverse; align-items: stretch; }
+#hz .head.solo .ist { display: none; }
+#hz .head.solo { justify-content: flex-end; }   /* row-reverse: flex-end = links */
+#hz .head.solo .soll { align-items: flex-start; }
+#hz .ist { display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 4px; min-width: 0; }
+#hz .ist .v { font-size: 44px; font-weight: 300; line-height: 1; letter-spacing: -.01em; }
+#hz .ist .v small { font-size: 18px; margin-left: 2px; color: var(--w5t-muted); }
+#hz .facts { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; white-space: normal; }
+#hz .facts span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+#hz .facts svg { width: 13px; height: 13px; flex: none; }
+#hz .soll { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 6px; }
+#hz .ctl { display: flex; align-items: center; gap: 4px; }
+#hz .soll .v { font-size: 26px; font-weight: 500; min-width: 76px; text-align: center; }
+#hz .mrow { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+#hz .mrow .ib { margin-left: auto; }
+#hz .mode { white-space: normal; align-self: flex-start; max-width: 100%; min-width: 0; }
 /* nur Sollwert (kein Ist, kein Wochenplan): Bedienung mittig in der Kachel */
 body.solo #hz { justify-content: center; align-items: center; }
-body.solo .head { justify-content: center; }
-body.solo .head .soll { align-items: center; gap: 10px; }
-body.solo .soll .ctl { gap: 14px; }
-body.solo .soll .v { font-size: 34px; min-width: 96px; }
-body.solo .rb { width: 52px; height: 52px; font-size: 26px; }
-.ist { display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 4px; min-width: 0; }
-.ist .v { font-size: 44px; font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-.ist .v small { font-size: 18px; font-weight: 400; margin-left: 2px; color: var(--hz-muted); }
-.facts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; font-size: 12px; color: var(--hz-muted); }
-.facts span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-.facts svg { width: 13px; height: 13px; flex: none; }
-.soll { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 6px; }
-.soll .ctl { display: flex; align-items: center; gap: 4px; }
-.soll .v { font-size: 26px; font-weight: 500; min-width: 76px; text-align: center; font-variant-numeric: tabular-nums; }
-.rb { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--hz-bg2); font-size: 22px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none; transition: background .15s, transform .1s; touch-action: manipulation; user-select: none; }
-.rb:hover { background: var(--hz-line); }
-.rb:active { transform: scale(.92); }
-.rb.sm { width: 38px; height: 38px; font-size: 19px; }
-.mrow { display: flex; align-items: center; gap: 10px; min-height: 40px; }
-.mrow .mode { min-width: 0; }
-.ib { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--hz-bg2); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex: none; margin-left: auto; touch-action: manipulation; transition: background .15s; }
-#hz .ib, #hz .ib svg { color: var(--hz-muted); }
-.ib svg { width: 20px; height: 20px; }
-.ib.on { background: var(--hz-accent); }
-#hz .ib.on, #hz .ib.on svg { color: var(--hz-on-accent); }
-.mode { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 12px; border-radius: 999px; background: var(--hz-bg2); align-self: flex-start; max-width: 100%; }
-.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-
-/* Abschnitte */
-.card { background: var(--hz-bg); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
-.card .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 26px; }
-.sp { display: flex; flex-direction: column; gap: 4px; }
-.sp + .sp { border-top: 1px solid var(--hz-line); padding-top: 10px; }
-.sp .t { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.sp .n { display: flex; align-items: center; gap: 8px; font-weight: 500; }
-.sp .badge { font-size: 10px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; color: #fff; }
-.sp .val { font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
-.sp .ctl { display: flex; align-items: center; gap: 10px; }
-
-input[type=range] { -webkit-appearance: none; appearance: none; flex: 1; min-width: 60px; height: 38px; background: none; margin: 0; --p: 50%; --c: var(--hz-accent); cursor: pointer; touch-action: pan-y; }
-input[type=range]:focus { outline: none; }
-input[type=range]::-webkit-slider-runnable-track { height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--c) var(--p), var(--hz-line) var(--p)); }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; margin-top: -9px; border: 3px solid var(--c); box-shadow: 0 1px 4px rgba(0,0,0,.25); }
-input[type=range]::-moz-range-track { height: 8px; border-radius: 4px; background: var(--hz-line); }
-input[type=range]::-moz-range-progress { height: 8px; border-radius: 4px; background: var(--c); }
-input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--c); }
-.scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--hz-muted); padding: 0 52px; }
-.sub { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--hz-line); margin-top: 4px; padding-top: 12px; }
-
+body.solo #hz .head { justify-content: center; }
+body.solo #hz .soll { align-items: center; gap: 10px; }
+body.solo #hz .soll .ctl { gap: 14px; }
+body.solo #hz .soll .v { font-size: 34px; min-width: 96px; }
+body.solo #hz .soll .ib { width: 52px; height: 52px; font-size: 26px; }
+/* Sollwerte je Betriebsart */
+#hz .sec { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--w5t-line); margin-top: 4px; padding-top: 12px; }
+#hz .sp { display: flex; flex-direction: column; gap: 4px; }
+#hz .sp + .sp { border-top: 1px solid var(--w5t-line); padding-top: 10px; }
+#hz .sp .n { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+#hz .sp .badge { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; padding: 2px 7px; }
+#hz .sp .val { font-size: 20px; font-weight: 500; }
+#hz .sp .ctl { gap: 10px; }
+#hz .sp .rng { flex: 1; width: auto; min-width: 60px; }
+#hz .scale { display: flex; justify-content: space-between; font-size: 10px; padding: 0 50px; }
+#hz .scale span { color: var(--w5t-muted); }
 /* Wochenprogramm */
-.wk { display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 10px; padding: 6px; margin: 0 -6px; touch-action: manipulation; }
-.wk:hover, .wk.sel { background: var(--hz-bg2); }
-.wk .d { width: 68px; flex: none; font-size: 13px; }
-.wk.today .d { font-weight: 600; color: var(--hz-accent); }
-.wk .chev { width: 16px; height: 16px; flex: none; color: var(--hz-muted); transition: transform .15s; }
-.wk.sel .chev { transform: rotate(90deg); }
-.bar { position: relative; flex: 1; height: 22px; border-radius: 6px; overflow: hidden; background: var(--hz-bg2); }
-.bar span { position: absolute; top: 0; bottom: 0; }
-.bar i { position: absolute; top: 0; bottom: 0; width: 3px; border-radius: 2px; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35); }
-.ticks { display: flex; justify-content: space-between; margin: -4px 26px 0 84px; font-size: 10px; color: var(--hz-muted); }
-.ed { border-radius: 12px; padding: 4px 0 2px; display: flex; flex-direction: column; gap: 8px; }
-.ed .pt { display: flex; align-items: center; gap: 8px; }
-.ed input[type=time], .ed select { font-size: 16px; min-height: 44px; background: var(--hz-bg2); border: 1px solid transparent; border-radius: 10px; padding: 6px 10px; }
-.ed input[type=time] { width: 112px; flex: none; }
-.ed select { flex: 1; min-width: 0; }
-.ed option { color: #000; }
-.x-btn { width: 44px; height: 44px; border: 0; border-radius: 50%; background: none; color: var(--hz-muted); cursor: pointer; font-size: 18px; flex: none; }
-.x-btn:hover { background: var(--hz-bg2); }
-.btn { align-self: flex-start; min-height: 40px; border: 1px solid var(--hz-accent); background: none; color: var(--hz-accent); border-radius: 999px; padding: 6px 16px; cursor: pointer; font-weight: 600; font-size: 13px; }
-.hint { color: var(--hz-muted); font-size: 11px; }
-.tg { position: relative; width: 48px; height: 28px; border-radius: 14px; background: var(--hz-line); border: 0; cursor: pointer; padding: 0; flex: none; }
-.tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .15s; }
-.tg.on { background: var(--hz-accent); }
-.tg.on::after { left: 23px; }
-.tgl { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--hz-muted); }
-
+#hz .wk { display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 10px; padding: 6px; margin: 0 -6px; touch-action: manipulation; }
+#hz .wk:hover, #hz .wk.sel { background: var(--w5t-bg2); }
+#hz .wk .d { width: 68px; flex: none; font-size: 13px; }
+#hz .wk.today .d { font-weight: 600; color: var(--w5t-accent); }
+#hz .wk .chev { width: 16px; height: 16px; flex: none; color: var(--w5t-muted); transition: transform .15s; }
+#hz .wk.sel .chev { transform: rotate(90deg); }
+#hz .wbar { position: relative; flex: 1; height: 22px; border-radius: 6px; overflow: hidden; background: var(--w5t-bg2); }
+#hz .wbar span { position: absolute; top: 0; bottom: 0; }
+#hz .wbar i { position: absolute; top: 0; bottom: 0; width: 3px; border-radius: 2px; background: var(--w5t-knob); box-shadow: 0 0 0 1px var(--w5t-shadow); }
+#hz .ticks { display: flex; justify-content: space-between; margin: -4px 26px 0 84px; font-size: 10px; }
+#hz .ticks span { color: var(--w5t-muted); }
+#hz .ed { padding: 4px 0 2px; display: flex; flex-direction: column; gap: 8px; }
+#hz .ed .pt { display: flex; align-items: center; gap: 8px; }
+#hz .ed input[type=time] { width: 112px; flex: none; }
+#hz .tgl { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--w5t-muted); }
+#hz .btn { align-self: flex-start; }
 /* schmal (Smartphone) */
 @media (max-width: 420px) {
-  #hz { padding-left: 12px; padding-right: 12px; }
-  .ist .v { font-size: 38px; }
-  .soll .v { font-size: 22px; min-width: 62px; }
-  .card { padding: 12px; }
-  .wk .d { width: 58px; font-size: 12px; }
-  .ticks { margin-left: 74px; }
+  #hz .ist .v { font-size: 38px; }
+  #hz .soll .v { font-size: 22px; min-width: 62px; }
+  #hz .wk .d { width: 58px; font-size: 12px; }
+  #hz .ticks { margin-left: 74px; }
 }
 /* kleine Kachel: nur Ist, Soll und Betriebsart */
-body.compact .hint { display: none; }   /* Wochenprogramm bleibt über das Regler-Symbol erreichbar und scrollt in der Kachel */
-body.compact #hz { gap: 8px; }
-body.compact .ist .v { font-size: 34px; }
-body.compact .soll .v { min-width: 0; font-size: 22px; }
-/* zugeklappte Kachel mit genug Höhe (z. B. iPhone 2×2): Inhalt mittig im freien Raum, größere Werte und Tasten */
+body.compact #hz .hint { display: none; }
+body.compact #hz .ist .v { font-size: 34px; }
+body.compact #hz .soll .v { min-width: 0; font-size: 22px; }
+/* zugeklappte Kachel mit genug Höhe (z. B. iPhone 2×2): Inhalt mittig, größere Werte und Tasten */
 body.closed #hz { justify-content: center; gap: 18px; padding-bottom: 20px; }
-body.closed .ist .v { font-size: 48px; }
-body.closed .ist .v small { font-size: 20px; }
-body.closed .facts { font-size: 13px; }
-body.closed .soll .v { font-size: 30px; min-width: 66px; }
-body.closed .rb { width: 50px; height: 50px; font-size: 24px; }
-body.closed .mode { font-size: 14px; padding: 9px 14px; }
-body.closed .ib { width: 46px; height: 46px; }
+body.closed #hz .ist .v { font-size: 48px; }
+body.closed #hz .ist .v small { font-size: 20px; }
+body.closed #hz .facts { font-size: 13px; }
+body.closed #hz .soll .v { font-size: 30px; min-width: 66px; }
+body.closed #hz .soll .ib { width: 50px; height: 50px; font-size: 24px; }
+body.closed #hz .mode { font-size: 14px; padding: 9px 14px; }
+body.closed #hz .mrow .ib { width: 46px; height: 46px; }
 /* kleine Kachel nur mit Sollwert: unter dem Titel mittig, ohne Beschriftung */
 body.solo.compact #hz { padding-top: 46px; padding-bottom: 8px; }
-body.solo.compact .soll .lbl { display: none; }
-body.solo.compact .soll .ctl { gap: 18px; }
-body.solo.compact .soll .v { font-size: 28px; min-width: 64px; }
-body.solo.compact .rb { width: 44px; height: 44px; font-size: 22px; }
+body.solo.compact #hz .soll .lbl { display: none; }
+body.solo.compact #hz .soll .ctl { gap: 18px; }
+body.solo.compact #hz .soll .v { font-size: 28px; min-width: 64px; }
+body.solo.compact #hz .soll .ib { width: 44px; height: 44px; font-size: 22px; }
 @media (max-height: 130px) {
   body.solo.compact #hz { padding-top: 40px; padding-bottom: 4px; }
-  body.solo.compact .rb { width: 38px; height: 38px; font-size: 20px; }
-  body.solo.compact .soll .v { font-size: 24px; }
+  body.solo.compact #hz .soll .ib { width: 38px; height: 38px; font-size: 20px; }
+  body.solo.compact #hz .soll .v { font-size: 24px; }
 }
 </style>
-<div id="hz"></div>
+<div id="hz" class="w5t fill"></div>
 <script>
 // open: Wochenprogramm aufgeklappt; null = automatisch nach Kachelhöhe (große Kachel / Vergrößern-Ansicht offen)
 var HZ = { s: null, busy: 0, pending: false, edit: null, open: null };
@@ -232,21 +167,10 @@ function nextSwitch() {
   return null;
 }
 
-/*
- * Hell/Dunkel erkennen: Die Kachel-Visu gibt die Textfarbe an die Seite weiter (helle Schrift = Dark Mode).
- * Schwarze Schrift bedeutet hellen Modus. Nur ohne lesbare Farbe entscheidet die Systemeinstellung.
- */
-function theme() {
-  var b = document.body;
-  var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(b).color || ''), dark;
-  // Schriftfarbe der Visu ist maßgeblich (auch Schwarz = heller Modus); die Systemeinstellung nur, wenn keine Farbe lesbar ist
-  if (m) {
-    dark = (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255 > 0.5;
-  } else {
-    dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  }
-  b.classList.toggle('dark', dark);
-}
+/* Hell/Dunkel übernimmt W5D_GetTileJS (w5tTheme); ohne Design-Modul bleibt der helle Modus */
+function theme() { if (typeof w5tTheme === 'function') w5tTheme(); }
+/* Spur des Schiebereglers: Füllung in der Farbe der Betriebsart bis zum Wert */
+function trk(c, p) { return 'linear-gradient(90deg,' + c + ' ' + p + '%,var(--w5t-line) ' + p + '%)'; }
 
 function render() {
   var s = HZ.s, el = document.getElementById('hz');
@@ -257,7 +181,7 @@ function render() {
   document.body.classList.toggle('solo', !s.hasActual && !s.humidity && s.valve === null && !(s.modes || []).length && !(s.groups || []).length && !s.error);
 
   // Kopf
-  h += '<div class="head' + (s.hasActual || s.humidity || s.valve !== null ? '' : ' solo') + '"><div class="ist">' + (s.hasActual ? '<div class="lbl">Ist</div><div class="v">' + fmt(s.actual, 1) + '<small>°C</small></div>' : '') + '<div class="facts">';
+  h += '<div class="head' + (s.hasActual || s.humidity || s.valve !== null ? '' : ' solo') + '"><div class="ist">' + (s.hasActual ? '<div class="lbl">Ist</div><div class="v num">' + fmt(s.actual, 1) + '<small>°C</small></div>' : '') + '<div class="facts">';
   if (s.humidity) {
     var hu = s.humidity, tip = 'Sensor ' + fmt(hu.raw, 0) + ' %' + (hu.ts !== null ? ' bei ' + fmt(hu.ts, 1) + ' °C' : '');
     h += '<span title="' + esc(tip) + '">' + ICON.drop + fmt(hu.rh, 0) + ' %</span>';
@@ -265,8 +189,8 @@ function render() {
   if (s.valve !== null) h += '<span>' + ICON.valve + 'Ventil ' + fmt(s.valve, 0) + ' %</span>';
   h += '</div></div>';
   if (s.target) {
-    h += '<div class="soll"><div class="lbl">Soll</div><div class="ctl"><button class="rb" data-t="-1" aria-label="Sollwert senken">−</button>'
-      + '<div class="v" id="tv">' + fmt(s.target.v, dg) + '°</div><button class="rb" data-t="1" aria-label="Sollwert erhöhen">+</button></div></div>';
+    h += '<div class="soll"><div class="lbl">Soll</div><div class="ctl"><button class="ib plain lg" data-t="-1" aria-label="Sollwert senken">−</button>'
+      + '<div class="v num" id="tv">' + fmt(s.target.v, dg) + '°</div><button class="ib plain lg" data-t="1" aria-label="Sollwert erhöhen">+</button></div></div>';
   }
   h += '</div>';
 
@@ -278,14 +202,14 @@ function render() {
     var nx = s.active ? nextSwitch() : null, txt = esc(cur.name);
     if (!s.active) txt += ' · Wochenplan aus';
     else if (nx) { var nm = modeById(nx.a); txt += ' bis ' + (nx.k === 1 ? 'morgen ' : nx.k > 1 ? DAYS[(dow() + nx.k) % 7] + ' ' : '') + hm(nx.t) + (nm ? ', dann ' + esc(nm.name) : ''); }
-    h += '<div class="mode"><span class="dot" style="background:' + cur.color + '"></span><span>' + txt + '</span></div>';
+    h += '<div class="chip mode"><span class="dot sm" style="background:' + cur.color + '"></span><span>' + txt + '</span></div>';
   }
   // Wochenprogramm wird nur zum Einstellen gebraucht: über das Regler-Symbol aufklappen (wie Klang in der Sonos-Kachel)
   // Regler-Symbol: öffnet das Fenster mit Sollwerten und Wochenplan (bzw. klappt ohne openObject auf); in großen Kacheln ist alles sichtbar
   var win = canOpenWindow();
   // Einstellungsseite: aktives Regler-Symbol = schließen, zurück zur Raumseite
-  if (s.alwaysOpen && s.backId > 0 && typeof openObject === 'function') h += '<button class="ib on" id="back" aria-label="Schließen, zurück zum Raum" title="Schließen">' + ICON.tune + '</button>';
-  if (hasPlan && !s.alwaysOpen && !(win && isOpen())) h += '<button class="ib' + (!win && isOpen() ? ' on' : '') + '" id="more" aria-expanded="' + isOpen() + '" title="Wochenprogramm und Sollwerte">' + ICON.tune + '</button>';
+  if (s.alwaysOpen && s.backId > 0 && typeof openObject === 'function') h += '<button class="ib" id="back" aria-label="Schließen, zurück zum Raum" title="Schließen">' + ICON.tune + '</button>';
+  if (hasPlan && !s.alwaysOpen && !(win && isOpen())) h += '<button class="ib' + (!win && isOpen() ? '' : ' plain') + '" id="more" aria-expanded="' + isOpen() + '" title="Wochenprogramm und Sollwerte">' + ICON.tune + '</button>';
   h += '</div>';
 
   // ohne Wochenplan oder zugeklappt nur Ist, Soll und Betriebsart
@@ -293,10 +217,10 @@ function render() {
 
   // Wochenprogramm mit Schaltpunkten, darunter die Sollwerte je Betriebsart
   var tb = 1 << dow(), nm2 = nowMin();
-  h += '<div class="card"><div class="top"><span class="lbl">Wochenprogramm</span><span class="tgl">' + (s.active ? 'aktiv' : 'aus') + '<button class="tg' + (s.active ? ' on' : '') + '" id="act" aria-label="Wochenplan ein/aus"></button></span></div>';
+  h += '<div class="card"><div class="row"><span class="lbl">Wochenprogramm</span><span class="tgl">' + (s.active ? 'aktiv' : 'aus') + '<button class="tg' + (s.active ? ' on' : '') + '" id="act" aria-label="Wochenplan ein/aus"></button></span></div>';
   (s.groups || []).forEach(function (g) {
     var today = (g.days & tb) !== 0;
-    h += '<div class="wk' + (today ? ' today' : '') + (HZ.edit === g.id ? ' sel' : '') + '" data-g="' + g.id + '"><div class="d">' + dayNames(g.days) + '</div><div class="bar">';
+    h += '<div class="wk' + (today ? ' today' : '') + (HZ.edit === g.id ? ' sel' : '') + '" data-g="' + g.id + '"><div class="d">' + dayNames(g.days) + '</div><div class="wbar">';
     var pts = g.points, last = pts.length ? pts[pts.length - 1].a : 0;
     var start = 0, act = (pts.length && pts[0].h === 0 && pts[0].m === 0) ? pts[0].a : last;
     pts.concat([{ h: 24, m: 0, a: null }]).forEach(function (p) {
@@ -309,25 +233,25 @@ function render() {
     if (HZ.edit === g.id) {
       h += '<div class="ed">';
       g.points.forEach(function (p) {
-        h += '<div class="pt"><input type="time" step="60" value="' + pad(p.h) + ':' + pad(p.m) + '" data-g="' + g.id + '" data-p="' + p.id + '" data-a="' + p.a + '"><select data-g="' + g.id + '" data-p="' + p.id + '">';
+        h += '<div class="pt"><input class="in" type="time" step="60" value="' + pad(p.h) + ':' + pad(p.m) + '" data-g="' + g.id + '" data-p="' + p.id + '" data-a="' + p.a + '"><select class="in" data-g="' + g.id + '" data-p="' + p.id + '">';
         (s.modes || []).forEach(function (m) { h += '<option value="' + m.id + '"' + (m.id === p.a ? ' selected' : '') + '>' + esc(m.name) + '</option>'; });
-        h += '</select><button class="x-btn" data-del="' + p.id + '" data-g="' + g.id + '" aria-label="Schaltpunkt löschen">✕</button></div>';
+        h += '</select><button class="ib ghost" data-del="' + p.id + '" data-g="' + g.id + '" aria-label="Schaltpunkt löschen">✕</button></div>';
       });
-      h += '<button class="btn" data-add="' + g.id + '">+ Schaltpunkt</button></div>';
+      h += '<button class="btn acc" data-add="' + g.id + '">+ Schaltpunkt</button></div>';
     }
   });
   h += '<div class="ticks"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>';
 
-  h += '<div class="sub"><div class="top"><span class="lbl">Sollwerte</span></div>';
+  h += '<div class="sec"><div class="row"><span class="lbl">Sollwerte</span></div>';
   (s.modes || []).forEach(function (m) {
     if (m.v === null) return;
     var p = (m.v - m.min) / (m.max - m.min) * 100;
-    h += '<div class="sp"><div class="t"><div class="n"><span class="dot" style="background:' + m.color + '"></span>' + esc(m.name)
+    h += '<div class="sp"><div class="row"><div class="n"><span class="dot" style="background:' + m.color + '"></span>' + esc(m.name)
       + (m.id === s.current && s.active ? ' <span class="badge" style="background:' + m.color + '">aktiv</span>' : '') + '</div>'
-      + '<div class="val" id="mv' + m.id + '">' + fmt(m.v, dg) + ' °C</div></div>'
-      + '<div class="ctl"><button class="rb sm" data-ms="-1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' senken">−</button>'
-      + '<input type="range" data-m="' + m.id + '" min="' + m.min + '" max="' + m.max + '" step="' + s.step + '" value="' + m.v + '" style="--p:' + p + '%;--c:' + m.color + '" aria-label="' + esc(m.name) + '">'
-      + '<button class="rb sm" data-ms="1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' erhöhen">+</button></div></div>';
+      + '<div class="val num" id="mv' + m.id + '">' + fmt(m.v, dg) + ' °C</div></div>'
+      + '<div class="ctl"><button class="ib plain" data-ms="-1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' senken">−</button>'
+      + '<input class="rng" type="range" data-m="' + m.id + '" min="' + m.min + '" max="' + m.max + '" step="' + s.step + '" value="' + m.v + '" style="--tr:' + trk(m.color, p) + ';--th:' + m.color + '" aria-label="' + esc(m.name) + '">'
+      + '<button class="ib plain" data-ms="1" data-m="' + m.id + '" aria-label="' + esc(m.name) + ' erhöhen">+</button></div></div>';
   });
   var m0 = (s.modes || []).filter(function (m) { return m.v !== null; })[0];
   if (m0) h += '<div class="scale"><span>' + fmt(m0.min, 0) + '°</span><span>' + fmt(m0.max, 0) + '°</span></div>';
@@ -344,7 +268,7 @@ function release() { HZ.busy = Math.max(0, HZ.busy - 1); if (HZ.busy === 0 && HZ
 /* Regler einer Betriebsart sichtbar setzen */
 function showMode(id, v) {
   var m = modeById(id), r = document.querySelector('input[type=range][data-m="' + id + '"]');
-  if (r) { r.value = v; r.style.setProperty('--p', ((v - m.min) / (m.max - m.min) * 100) + '%'); }
+  if (r) { r.value = v; r.style.setProperty('--tr', trk(m.color, (v - m.min) / (m.max - m.min) * 100)); }
   document.getElementById('mv' + id).textContent = fmt(v, digits()) + ' °C';
 }
 
@@ -369,7 +293,7 @@ function bind() {
     // nur innerhalb der Kachel scrollen (scrollIntoView würde auch die Visu um die Kachel herum verschieben)
     if (c) { var hz = document.getElementById('hz'); hz.scrollTo({ top: Math.max(0, c.offsetTop - 8), behavior: 'smooth' }); }
   };
-  document.querySelectorAll('.rb[data-t]').forEach(function (b) {
+  document.querySelectorAll('button[data-t]').forEach(function (b) {
     b.onclick = function () {
       var v = snap(s.target.v + Number(b.dataset.t) * s.step, s.target);
       if (v === s.target.v) return;
@@ -377,7 +301,7 @@ function bind() {
       send('SetTarget', v);
     };
   });
-  document.querySelectorAll('.rb[data-ms]').forEach(function (b) {
+  document.querySelectorAll('button[data-ms]').forEach(function (b) {
     b.onclick = function () {
       var id = Number(b.dataset.m), m = modeById(id), v = snap(m.v + Number(b.dataset.ms) * s.step, m);
       if (v === m.v) return;
