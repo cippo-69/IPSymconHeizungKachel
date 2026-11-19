@@ -57,6 +57,34 @@ body.solo #hz .soll .ib { width: 52px; height: 52px; font-size: 26px; }
 #hz .ed input[type=time] { width: 112px; flex: none; }
 #hz .tgl { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--w5t-muted); }
 #hz .btn { align-self: flex-start; }
+/* Verlauf (Einstellungsseite) – wie Heizungsanlage Kachel */
+#hz .nav { display: flex; align-items: center; gap: 8px; }
+#hz .when { flex: 1; text-align: center; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#hz .live { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--w5t-accent); padding: 0 6px; }
+#hz .plot { position: relative; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; min-height: 130px; margin: 0 34px 0 30px; }
+#hz .plot:active { cursor: grabbing; }
+#hz .plot .load { height: 130px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--w5t-muted); }
+#hz .chart svg { width: 100%; height: 130px; touch-action: pan-y; display: block; overflow: visible; }
+#hz .chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+#hz .chart .ln.thin { stroke-width: 1.2; opacity: .8; }
+#hz .chart .va { fill: var(--w5t-cold); opacity: .14; }
+#hz .chart .gl { stroke: var(--w5t-line); stroke-width: 1; }
+#hz .chart .dl { stroke-dasharray: 3 3; }
+#hz .chart .cur { stroke: var(--w5t-fg); stroke-width: 1; opacity: .5; }
+#hz .yl { position: absolute; top: -6px; bottom: -6px; right: -34px; width: 30px; display: flex; flex-direction: column; justify-content: space-between; font-size: 10px; pointer-events: none; }
+#hz .yl.left { right: auto; left: -30px; width: 28px; text-align: right; }
+#hz .yl span { color: var(--w5t-muted); }
+#hz .yl.left span { color: var(--w5t-cold); }
+#hz .tip { position: absolute; top: -6px; display: none; flex-wrap: wrap; gap: 2px 10px; max-width: 100%; font-size: 11px; padding: 5px 8px; border-radius: 8px; background: var(--w5t-bg2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); pointer-events: none; box-shadow: 0 1px 4px var(--w5t-shadow); z-index: 2; }
+#hz .tip b { width: 100%; font-weight: 600; }
+#hz .tip i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+#hz .ax { font-size: 10px; display: flex; justify-content: space-between; line-height: 1.25; margin: 0 34px 0 30px; }
+#hz .ax span { text-align: center; color: var(--w5t-muted); }
+#hz .ax span:first-child { text-align: left; }
+#hz .ax span:last-child { text-align: right; }
+#hz .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+#hz .legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+#hz .legend i.soll { background: repeating-linear-gradient(90deg, var(--w5t-hot) 0 4px, transparent 4px 6px) !important; }
 /* schmal (Smartphone) */
 @media (max-width: 420px) {
   #hz .ist .v { font-size: 38px; }
@@ -123,11 +151,20 @@ function design(css) {
 }
 
 function handleMessage(data) {
-  try { HZ.s = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
+  var m;
+  try { m = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
+  if (m && m.type === 'hist') {            // Antwort auf eine Verlaufsanfrage, nur die eigene übernehmen
+    if (m.id !== HV.req) return;
+    HV.data = m;
+    if (HZ.busy > 0 || HV.drag) { HZ.pending = true; return; }
+    render();
+    return;
+  }
+  HZ.s = m;
   design(HZ.s.design);
   // gemerkter Klappzustand vom Modul (gilt nach Neuladen und auf allen Geräten); null = automatisch nach Kachelhöhe
   if (typeof HZ.s.expanded === 'boolean') { if (HZ.open !== HZ.s.expanded && !HZ.s.expanded) HZ.edit = null; HZ.open = HZ.s.expanded; }
-  if (HZ.busy > 0) { HZ.pending = true; return; }
+  if (HZ.busy > 0 || HV.drag) { HZ.pending = true; return; }
   render();
 }
 
@@ -259,10 +296,141 @@ function render() {
   var m0 = (s.modes || []).filter(function (m) { return m.v !== null; })[0];
   if (m0) h += '<div class="scale"><span>' + fmt(m0.min, 0) + '°</span><span>' + fmt(m0.max, 0) + '°</span></div>';
   h += '</div></div>';
+  if (s.alwaysOpen) h += chartCard();      // Verlauf nur auf der Einstellungsseite
   h += '<div class="hint">Tageszeile antippen, um Schaltpunkte zu bearbeiten. Die Sollwertverstellung oben gilt bis zum nächsten Schaltpunkt.</div>';
 
   el.innerHTML = h;
   bind();
+  if (s.alwaysOpen) bindChart();
+}
+
+/* ---------- Verlauf (Einstellungsseite): verschiebbar, Zeitraum wählbar, Werte mit Datum und Uhrzeit ---------- */
+var WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+var SPANS = [[21600, '6 h'], [86400, '24 h'], [259200, '3 T'], [604800, '7 T']];
+var COL = { soll: 'var(--w5t-hot)', ist: 'var(--w5t-fg)', ventil: 'var(--w5t-cold)' }, NAME = { soll: 'Soll', ist: 'Ist', ventil: 'Ventil' };
+// end null = live (bis jetzt); data = Antwort auf die eigene Anfrage (req)
+var HV = { end: null, span: 86400, data: null, req: null, drag: null, plot: null, timer: null };
+
+function nowS() { return Math.floor(Date.now() / 1000); }
+function dt(ts, withDay) { var d = new Date(ts * 1000); return (withDay ? WD[d.getDay()] + ' ' : '') + pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '. ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function viewEnd() { return HV.end === null ? nowS() : HV.end; }
+function loadHist() {
+  var id = Math.random().toString(36).slice(2, 10), to = viewEnd();
+  HV.req = id;
+  send('History', JSON.stringify({ id: id, from: to - HV.span, to: to }));
+}
+function setView(end, span) {
+  if (span) HV.span = span;
+  if (end !== null && end >= nowS() - 120) end = null;   // bis jetzt = live
+  HV.end = end; HV.data = null;
+  loadHist();
+  render();
+}
+/* Stufenlinie: Wert gilt bis zum nächsten Punkt */
+function stepPts(pts, x, y) {
+  var o = [];
+  pts.forEach(function (p, i) { if (i) o.push(x(p[0]) + ',' + y(pts[i - 1][1])); o.push(x(p[0]) + ',' + y(p[1])); });
+  return o.join(' ');
+}
+function chartCard() {
+  if (!HV.data && !HV.req) loadHist();
+  if (!HV.timer) HV.timer = setInterval(function () { if (HV.end === null && !HV.drag && HZ.busy === 0) loadHist(); }, 300000);
+  var d = HV.data, se = d ? d.series || {} : {}, to = d ? d.to : viewEnd(), from = d ? d.from : to - HV.span, span = to - from;
+  var keys = ['soll', 'ist', 'ventil'].filter(function (k) { return se[k] && se[k].length > 1; });
+  var h = '<div class="card chart"><div class="row"><span class="lbl">Verlauf</span><span class="seg sm">';
+  SPANS.forEach(function (x) { h += '<button class="' + (HV.span === x[0] ? 'on' : '') + '" data-span="' + x[0] + '">' + x[1] + '</button>'; });
+  h += '</span></div><div class="nav"><button class="ib plain sm" data-nav="-1" aria-label="zurück">‹</button><span class="when num" id="rng">' + dt(from, true) + ' – ' + dt(to, false) + '</span>'
+    + '<button class="ib plain sm" data-nav="1" aria-label="vor"' + (HV.end === null ? ' disabled' : '') + '>›</button>'
+    + (HV.end === null ? '<span class="live">live</span>' : '<button class="btn acc sm" data-nav="0">Jetzt</button>') + '</div>';
+  h += '<div class="plot" id="plot">';
+  HV.plot = null;
+  if (!d) h += '<div class="load">lädt …</div>';
+  else if (!keys.length) h += '<div class="load">keine Daten im Zeitraum</div>';
+  else {
+    // Temperaturachse (Soll, Ist) in 1-K-Schritten, mindestens 4 K; Ventil 0–100 % auf eigener Achse links
+    var lo = 1e9, hi = -1e9;
+    ['soll', 'ist'].forEach(function (k) { (se[k] || []).forEach(function (p) { lo = Math.min(lo, p[1]); hi = Math.max(hi, p[1]); }); });
+    if (lo > hi) { lo = 15; hi = 25; }
+    lo = Math.floor(lo - 0.5); hi = Math.ceil(hi + 0.5); if (hi - lo < 4) hi = lo + 4;
+    var W = 300, H = 120, x = function (t) { return ((t - from) / span * W).toFixed(2); };
+    var y = function (v) { return (H - (v - lo) / (hi - lo) * H).toFixed(1); }, yv = function (v) { return (H - v / 100 * H).toFixed(1); };
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">';
+    for (var g = 0; g <= 4; g++) svg += '<line class="gl" x1="0" x2="' + W + '" y1="' + (H * g / 4) + '" y2="' + (H * g / 4) + '" vector-effect="non-scaling-stroke"/>';
+    svg += '<g id="pl">';
+    var md = new Date(from * 1000); md.setHours(24, 0, 0, 0);
+    for (var t = md.getTime() / 1000; t < to; t += 86400) svg += '<line class="gl dl" x1="' + x(t) + '" x2="' + x(t) + '" y1="0" y2="' + H + '" vector-effect="non-scaling-stroke"/>';
+    if (se.ventil && se.ventil.length > 1) {
+      var vp = stepPts(se.ventil, x, yv);
+      svg += '<polygon class="va" points="' + x(se.ventil[0][0]) + ',' + H + ' ' + vp + ' ' + x(se.ventil[se.ventil.length - 1][0]) + ',' + H + '"/>'
+        + '<polyline class="ln thin" points="' + vp + '" stroke="' + COL.ventil + '" vector-effect="non-scaling-stroke"/>';
+    }
+    if (se.soll && se.soll.length > 1) svg += '<polyline class="ln" points="' + stepPts(se.soll, x, y) + '" stroke="' + COL.soll + '" stroke-dasharray="5 3" vector-effect="non-scaling-stroke"/>';
+    if (se.ist && se.ist.length > 1) svg += '<polyline class="ln" points="' + se.ist.map(function (p) { return x(p[0]) + ',' + y(p[1]); }).join(' ') + '" stroke="' + COL.ist + '" vector-effect="non-scaling-stroke"/>';
+    svg += '</g><line id="cur" class="cur" style="display:none" x1="0" x2="0" y1="0" y2="' + H + '" vector-effect="non-scaling-stroke"/></svg>';
+    h += svg + '<div class="yl"><span>' + hi + '°</span><span>' + lo + '°</span></div>';
+    if (se.ventil) h += '<div class="yl left"><span>100 %</span><span>0 %</span></div>';
+    h += '<div class="tip" id="tip"></div>';
+    HV.plot = { from: from, to: to, se: se, keys: keys };
+  }
+  h += '</div><div class="ax">';
+  for (var i = 0; i <= 4; i++) { var ts = from + span * i / 4, dd = new Date(ts * 1000); h += '<span>' + WD[dd.getDay()] + ' ' + pad(dd.getDate()) + '.' + pad(dd.getMonth() + 1) + '.<br>' + pad(dd.getHours()) + ':' + pad(dd.getMinutes()) + '</span>'; }
+  h += '</div><div class="legend">';
+  keys.forEach(function (k) { h += '<span><i class="' + k + '" style="background:' + COL[k] + '"></i>' + NAME[k] + (k === 'ventil' ? ' %' : '') + '</span>'; });
+  return h + '</div></div>';
+}
+/* Werte am Zeitpunkt der Zeigerposition (Soll/Ventil: letzter Wert davor, Ist: nächster Wert) */
+function valAt(pts, t, step) {
+  var best = null;
+  pts.forEach(function (p) { if (step) { if (p[0] <= t) best = p; } else if (best === null || Math.abs(p[0] - t) < Math.abs(best[0] - t)) best = p; });
+  return best;
+}
+function tip(px) {
+  var P = HV.plot, el = document.getElementById('plot'), tp = document.getElementById('tip'), cur = document.getElementById('cur');
+  if (!P || !el || !tp) return;
+  var r = el.getBoundingClientRect(), f = Math.max(0, Math.min(1, (px - r.left) / r.width)), t = P.from + f * (P.to - P.from), txt = '<b>' + dt(t, true) + '</b>';
+  P.keys.forEach(function (k) {
+    var b = valAt(P.se[k], t, k !== 'ist');
+    if (b) txt += '<span><i style="background:' + COL[k] + '"></i>' + NAME[k] + ' ' + (k === 'ventil' ? fmt(b[1], 0) + ' %' : fmt(b[1], 1) + '°') + '</span>';
+  });
+  tp.innerHTML = txt; tp.style.display = 'flex';
+  tp.style.left = Math.min(Math.max(0, f * r.width - tp.offsetWidth / 2), r.width - tp.offsetWidth) + 'px';
+  cur.setAttribute('x1', (f * 300).toFixed(2)); cur.setAttribute('x2', (f * 300).toFixed(2)); cur.style.display = '';
+}
+function untip() { var tp = document.getElementById('tip'), cur = document.getElementById('cur'); if (tp) tp.style.display = 'none'; if (cur) cur.style.display = 'none'; }
+function bindChart() {
+  document.querySelectorAll('#hz [data-span]').forEach(function (b) {
+    b.onclick = function () { setView(HV.end, Number(b.dataset.span)); };
+  });
+  document.querySelectorAll('#hz [data-nav]').forEach(function (b) {
+    b.onclick = function () { var n = Number(b.dataset.nav); if (n === 0) setView(null); else setView(viewEnd() + n * HV.span / 2); };
+  });
+  var pl = document.getElementById('plot');
+  if (!pl || !HV.plot) return;
+  pl.addEventListener('pointerdown', function (e) {
+    HV.drag = { x: e.clientX, end: HV.plot.to, w: pl.getBoundingClientRect().width, moved: false };
+    try { pl.setPointerCapture(e.pointerId); } catch (x) { /* */ }
+  });
+  pl.addEventListener('pointermove', function (e) {
+    var D = HV.drag;
+    if (!D) { if (e.pointerType === 'mouse') tip(e.clientX); return; }
+    var dx = e.clientX - D.x;
+    if (!D.moved && Math.abs(dx) < 8) return;
+    D.moved = true; untip();
+    var span = HV.plot.to - HV.plot.from, end = Math.min(nowS(), D.end - dx / D.w * span);
+    dx = (D.end - end) / span * D.w;   // nicht über „jetzt“ hinaus
+    document.getElementById('pl').setAttribute('transform', 'translate(' + (dx / D.w * 300).toFixed(2) + ',0)');
+    document.getElementById('rng').textContent = dt(end - span, true) + ' – ' + dt(end, false);
+  });
+  function up(e) {
+    var D = HV.drag; HV.drag = null;
+    if (!D) return;
+    if (!D.moved) { tip(e.clientX); return; }
+    var span = HV.plot.to - HV.plot.from;
+    setView(Math.round(Math.min(nowS(), D.end - (e.clientX - D.x) / D.w * span)));
+  }
+  pl.addEventListener('pointerup', up);
+  pl.addEventListener('pointercancel', function () { HV.drag = null; render(); });
+  pl.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse' && !HV.drag) untip(); });
 }
 
 function hold() { HZ.busy++; }

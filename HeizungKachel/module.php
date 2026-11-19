@@ -151,9 +151,71 @@ class HeizungKachel extends IPSModuleStrict
         return $id > 0 && function_exists('W5D_GetTileJS') ? '<script>' . W5D_GetTileJS($id) . '</script>' : '';
     }
 
+    /* ---------- Verlauf (Einstellungsseite): Soll, Ist, Ventil aus dem Archiv ---------- */
+
+    private function ArchiveID(): int
+    {
+        $l = IPS_GetInstanceListByModuleID('{43192F0B-135B-4CE7-A0A7-1475603F3060}');
+        return $l ? (int) $l[0] : 0;
+    }
+
+    /**
+     * Antwort auf eine Verlaufsanfrage der Kachel (Verschieben, Zeitraum). Geht wie jeder Zustand an alle offenen Kacheln;
+     * nur die Kachel mit der passenden Anfrage-ID übernimmt sie.
+     */
+    private function History(string $id, int $from, int $to): void
+    {
+        $to = min($to, time());
+        $from = max($from, $to - 31 * 86400);
+        if ($to - $from < 3600) {
+            $from = $to - 3600;
+        }
+        $ac = $this->ArchiveID();
+        $se = [];
+        if ($ac > 0) {
+            // Soll und Ventil ändern sich selten: Einzelwerte als Stufen, mit dem Wert vor Beginn des Zeitraums
+            foreach (['TargetID' => 'soll', 'ValveID' => 'ventil'] as $p => $k) {
+                $vid = $this->ReadPropertyInteger($p);
+                if ($vid <= 0 || !@IPS_VariableExists($vid) || !AC_GetLoggingStatus($ac, $vid)) {
+                    continue;
+                }
+                $pts = [];
+                $prev = (array) @AC_GetLoggedValues($ac, $vid, 0, $from, 1);
+                if (isset($prev[0])) {
+                    $pts[] = [$from, round((float) $prev[0]['Value'], 1)];
+                }
+                foreach (array_reverse((array) @AC_GetLoggedValues($ac, $vid, $from, $to, 5000)) as $v) {
+                    $pts[] = [(int) $v['TimeStamp'], round((float) $v['Value'], 1)];
+                }
+                if ($pts) {
+                    $pts[] = [$to, round((float) GetValue($vid), 1)];
+                    $se[$k] = $pts;
+                }
+            }
+            // Ist: bis 3 Tage 5-Minuten-Mittel, darüber Stundenmittel
+            $vid = $this->ReadPropertyInteger('ActualID');
+            if ($vid > 0 && @IPS_VariableExists($vid) && AC_GetLoggingStatus($ac, $vid)) {
+                $pts = [];
+                foreach (array_reverse((array) @AC_GetAggregatedValues($ac, $vid, ($to - $from) > 3 * 86400 ? 0 : 5, $from, $to, 0)) as $v) {
+                    $pts[] = [(int) $v['TimeStamp'], round((float) $v['Avg'], 1)];
+                }
+                if ($pts) {
+                    $se['ist'] = $pts;
+                }
+            }
+        }
+        $this->UpdateVisualizationValue(json_encode(['type' => 'hist', 'id' => $id, 'from' => $from, 'to' => $to, 'series' => $se]));
+    }
+
     public function RequestAction(string $Ident, mixed $Value): void
     {
         $p = is_string($Value) ? json_decode($Value, true) : null;
+        if ($Ident === 'History') {
+            if (is_array($p)) {
+                $this->History(substr((string) ($p['id'] ?? ''), 0, 16), (int) ($p['from'] ?? 0), (int) ($p['to'] ?? 0));
+            }
+            return;
+        }
         switch ($Ident) {
             case 'SetTarget':
                 $this->SetTarget((float) $Value);
