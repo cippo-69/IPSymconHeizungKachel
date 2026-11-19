@@ -55,6 +55,14 @@ body.solo #hz .soll .ib { width: 52px; height: 52px; font-size: 26px; }
 #hz .ed { padding: 4px 0 2px; display: flex; flex-direction: column; gap: 8px; }
 #hz .ed .pt { display: flex; align-items: center; gap: 8px; }
 #hz .ed input[type=time] { width: 112px; flex: none; }
+#hz .ed input[type=time]:disabled { opacity: .6; }
+#hz .ed .lock { width: 40px; flex: none; text-align: center; font-size: 11px; color: var(--w5t-muted); }
+#hz .ed .btn.del { flex: none; border-color: var(--w5t-bad); color: var(--w5t-bad); padding: 6px 10px; }
+#hz .note { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; font-size: 13px; padding: 8px 12px; border-radius: 10px; background: var(--w5t-bg2); }
+#hz .note span { flex: 1 1 160px; min-width: 0; }
+#hz .note.warn { box-shadow: inset 3px 0 0 var(--w5t-warn); }
+#hz .note.err { box-shadow: inset 3px 0 0 var(--w5t-bad); }
+#hz .note.err span { color: var(--w5t-bad); }
 #hz .tgl { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--w5t-muted); }
 #hz .btn { align-self: flex-start; }
 /* Verlauf (Einstellungsseite) – wie Heizungsanlage Kachel */
@@ -153,6 +161,12 @@ function design(css) {
 function handleMessage(data) {
   var m;
   try { m = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
+  if (m && m.type === 'notice') {          // Hinweis vom Modul: Fehler oder „gelöscht“ mit Rückgängig
+    HZ.note = { text: m.text, error: !!m.error, undo: m.undo || null };
+    clearTimeout(HZ.noteT); HZ.noteT = setTimeout(function () { HZ.note = null; render(); }, m.undo ? 15000 : 8000);
+    if (HZ.busy === 0 && !HV.drag && HZ.s) render();
+    return;
+  }
   if (m && m.type === 'hist') {            // Antwort auf eine Verlaufsanfrage, nur die eigene übernehmen
     if (m.id !== HV.req) return;
     HV.data = m;
@@ -272,10 +286,25 @@ function render() {
     h += '</div>' + ICON.chev + '</div>';
     if (HZ.edit === g.id) {
       h += '<div class="ed">';
+      // Hinweis vom Modul (Fehler / gelöscht mit Rückgängig)
+      if (HZ.note) h += '<div class="note' + (HZ.note.error ? ' err' : '') + '"><span>' + esc(HZ.note.text) + '</span>'
+        + (HZ.note.undo && HZ.note.undo.g === g.id ? '<button class="btn acc sm" id="undo">Rückgängig</button>' : '') + '</div>';
+      // Tagesbeginn fehlt: bis zum ersten Schaltpunkt gilt die Betriebsart vom Vortag – Ergänzen anbieten
+      var has0 = g.points.some(function (p) { return p.h === 0 && p.m === 0; });
+      if (!has0 && g.points.length) {
+        var lm = modeById(g.points[g.points.length - 1].a);
+        h += '<div class="note warn"><span>Kein Schaltpunkt um 00:00 – bis zum ersten Schaltpunkt läuft die Betriebsart vom Vortag weiter.</span>'
+          + '<button class="btn acc sm" data-fix0="' + g.id + '" data-a="' + g.points[g.points.length - 1].a + '">00:00 ' + esc(lm ? lm.name : '') + ' ergänzen</button></div>';
+      }
       g.points.forEach(function (p) {
-        h += '<div class="pt"><input class="in" type="time" step="60" value="' + pad(p.h) + ':' + pad(p.m) + '" data-g="' + g.id + '" data-p="' + p.id + '" data-a="' + p.a + '"><select class="in" data-g="' + g.id + '" data-p="' + p.id + '">';
+        var first = p.h === 0 && p.m === 0, key = g.id + ':' + p.id, ask = HZ.askDel === key;
+        h += '<div class="pt"><input class="in" type="time" step="60" value="' + pad(p.h) + ':' + pad(p.m) + '" data-g="' + g.id + '" data-p="' + p.id + '" data-a="' + p.a + '"' + (first ? ' disabled title="Tagesbeginn"' : '') + '><select class="in" data-g="' + g.id + '" data-p="' + p.id + '">';
         (s.modes || []).forEach(function (m) { h += '<option value="' + m.id + '"' + (m.id === p.a ? ' selected' : '') + '>' + esc(m.name) + '</option>'; });
-        h += '</select><button class="ib ghost" data-del="' + p.id + '" data-g="' + g.id + '" aria-label="Schaltpunkt löschen">✕</button></div>';
+        h += '</select>';
+        // 00:00 ist der Tagesbeginn und nicht löschbar; sonst Löschen mit Bestätigung (zweites Antippen)
+        if (first) h += '<span class="lock" title="Tagesbeginn – nicht löschbar">00</span>';
+        else h += '<button class="' + (ask ? 'btn del sm' : 'ib ghost') + '" data-del="' + p.id + '" data-g="' + g.id + '" aria-label="Schaltpunkt löschen">' + (ask ? 'Löschen?' : '✕') + '</button>';
+        h += '</div>';
       });
       h += '<button class="btn acc" data-add="' + g.id + '">+ Schaltpunkt</button></div>';
     }
@@ -509,7 +538,25 @@ function bind() {
     };
   });
   document.querySelectorAll('[data-del]').forEach(function (b) {
-    b.onclick = function () { send('DeletePoint', JSON.stringify({ g: Number(b.dataset.g), p: Number(b.dataset.del) })); };
+    b.onclick = function () {
+      var key = b.dataset.g + ':' + b.dataset.del;
+      if (HZ.askDel !== key) {               // erstes Antippen: nachfragen, nach 4 s wieder zurück
+        HZ.askDel = key; clearTimeout(HZ.askT);
+        HZ.askT = setTimeout(function () { HZ.askDel = null; render(); }, 4000);
+        render(); return;
+      }
+      HZ.askDel = null; clearTimeout(HZ.askT);
+      send('DeletePoint', JSON.stringify({ g: Number(b.dataset.g), p: Number(b.dataset.del) }));
+    };
+  });
+  var ub = document.getElementById('undo');
+  if (ub) ub.onclick = function () {
+    var u = HZ.note && HZ.note.undo; if (!u) return;
+    HZ.note = null;
+    send('SetPoint', JSON.stringify({ g: u.g, p: -1, h: u.h, m: u.m, a: u.a }));
+  };
+  document.querySelectorAll('[data-fix0]').forEach(function (b) {
+    b.onclick = function () { send('SetPoint', JSON.stringify({ g: Number(b.dataset.fix0), p: -1, h: 0, m: 0, a: Number(b.dataset.a) })); };
   });
   document.querySelectorAll('[data-add]').forEach(function (b) {
     b.onclick = function () {

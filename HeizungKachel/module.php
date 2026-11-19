@@ -305,17 +305,47 @@ class HeizungKachel extends IPSModuleStrict
             }
             $point = $max + 1;
         }
-        IPS_SetEventScheduleGroupPoint($sched['EventID'], $group, $point, $h, $m, 0, $action);
+        try {
+            IPS_SetEventScheduleGroupPoint($sched['EventID'], $group, $point, $h, $m, 0, $action);
+        } catch (Throwable $e) {
+            $this->Notice('Schaltpunkt konnte nicht gespeichert werden: ' . $e->getMessage(), true);
+        }
     }
 
     private function DeletePoint(int $group, int $point): void
     {
         $sched = $this->Schedule();
-        if ($sched === null || $this->Group($sched, $group) === null) {
+        $g = $sched === null ? null : $this->Group($sched, $group);
+        if ($g === null) {
             return;
         }
-        // ActionID -1 löscht den Schaltpunkt
-        IPS_SetEventScheduleGroupPoint($sched['EventID'], $group, $point, -1, -1, -1, -1);
+        $pt = null;
+        foreach ($g['Points'] as $x) {
+            if ((int) $x['ID'] === $point) {
+                $pt = $x;
+            }
+        }
+        if ($pt === null) {
+            return;   // schon gelöscht (z. B. doppelt angetippt)
+        }
+        if ((int) $pt['Start']['Hour'] === 0 && (int) $pt['Start']['Minute'] === 0) {
+            $this->Notice('Der Schaltpunkt um 00:00 legt den Tagesbeginn fest und kann nicht gelöscht werden. Betriebsart dort bei Bedarf ändern.', true);
+            return;
+        }
+        try {
+            // ActionID -1 löscht den Schaltpunkt
+            IPS_SetEventScheduleGroupPoint($sched['EventID'], $group, $point, -1, -1, -1, -1);
+            $this->Notice(sprintf('Schaltpunkt %02d:%02d gelöscht', $pt['Start']['Hour'], $pt['Start']['Minute']), false,
+                ['g' => $group, 'h' => (int) $pt['Start']['Hour'], 'm' => (int) $pt['Start']['Minute'], 'a' => (int) $pt['ActionID']]);
+        } catch (Throwable $e) {
+            $this->Notice('Schaltpunkt konnte nicht gelöscht werden: ' . $e->getMessage(), true);
+        }
+    }
+
+    /** Hinweis an die Kachel (Fehler oder „gelöscht“ mit Rückgängig-Daten) */
+    private function Notice(string $text, bool $error, ?array $undo = null): void
+    {
+        $this->UpdateVisualizationValue(json_encode(['type' => 'notice', 'text' => $text, 'error' => $error, 'undo' => $undo]));
     }
 
     /* ---------- Zustand ---------- */
